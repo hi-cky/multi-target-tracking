@@ -1,0 +1,29 @@
+[
+  {
+    "label": "Init",
+    "command": "cmake --preset qt-debug && cmake --build --preset qt-debug && ln -sf build/debug/compile_commands.json compile_commands.json",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "reveal": "always",
+    "hide": "never",
+    "shell": "system"
+  },
+  {
+    "label": "Build&Run Qt Debug",
+    "command": "cmake --build --preset qt-debug && open output/QtZedDemo.app",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "reveal": "always",
+    "hide": "never",
+    "shell": "system"
+  },
+  {
+    "label": "Run Tests",
+    "command": "cmake --preset qt-debug --fresh -DBUILD_TESTING=ON && cmake --build --preset qt-debug && cd build/debug && ctest --output-on-failure",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "reveal": "always",
+    "hide": "never",
+    "shell": "system"
+  }
+]

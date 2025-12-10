@@ -1,0 +1,40 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Kitware/CMake/master/Help/manual/presets/schema.json",
+  "version": 8,
+  "configurePresets": [
+    {
+      "name": "qt-debug",
+      "displayName": "Qt Debug (Ninja)",
+      "description": "使用 Ninja 构建 Debug 版本，指向 QT_PATH 环境变量",
+      "generator": "Ninja",
+      "binaryDir": "build/debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_PREFIX_PATH": "$env{QT_PATH}",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "qt-release",
+      "displayName": "Qt Release (Ninja)",
+      "description": "发布版本 preset，方便 macdeployqt 之后直接打包",
+      "generator": "Ninja",
+      "binaryDir": "build/release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_PREFIX_PATH": "$env{QT_PATH}",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "qt-debug",
+      "configurePreset": "qt-debug"
+    },
+    {
+      "name": "qt-release",
+      "configurePreset": "qt-release"
+    }
+  ]
+}

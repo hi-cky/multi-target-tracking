@@ -1,0 +1,31 @@
+{
+  // 过程级别中文注释：强制 C++/QML 使用 clangd，确保 Qt include 信息来自 compile_commands.json
+  "languages": {
+    "C++": {
+      "language_servers": ["clangd"]
+    },
+    "Python": {
+      // 过程级别中文注释：限制 Python 诊断仅针对项目源码，避免扫描 build/.cache 等目录
+      "language_servers": ["basedpyright"]
+    }
+  },
+  "lsp": {
+    "basedpyright": {
+      "settings": {
+        "python.analysis": {
+          "diagnosticMode": "workspace",
+          "exclude": [
+            "build",
+            "**/scripts/**",
+            "**/build/**",
+            "**/.cache/**",
+            "**/.venv/**",
+            "**/env/**",
+            "**/model/**"
+          ],
+          "extraPaths": ["src"]
+        }
+      }
+    }
+  }
+}

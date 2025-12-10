@@ -1,0 +1,9 @@
+# 过程级别中文注释：为 clangd 添加 Qt 常用头文件与 Framework 搜索路径
+CompileFlags:
+  Add:
+    - "-I$QT_PATH/include"
+    - "-I$QT_PATH/include/QtCore"
+    - "-I$QT_PATH/include/QtGui"
+    - "-I$QT_PATH/include/QtWidgets"
+    - "-F$QT_PATH/lib"
+# 若后续加入更多模块，可在此继续添加 -I/-F

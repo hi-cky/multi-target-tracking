@@ -1,0 +1,16 @@
+{
+  // 排除哪些目录（黑名单）
+  "exclude": [
+    "build"
+  ],
+
+  // 可选：使用更加轻量的 basic 模式（推荐）
+  "typeCheckingMode": "basic",
+
+  // 可选：关闭“unknown”系列的干扰警告
+  "reportUnknownMemberType": "none",
+  "reportUnknownVariableType": "none",
+  "reportUnknownArgumentType": "none",
+  "reportUnknownParameterType": "none",
+  "reportUnknownLambdaType": "none"
+}
