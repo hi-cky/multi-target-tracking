@@ -29,15 +29,16 @@ jobs:
         run: |
           git clone https://github.com/microsoft/vcpkg.git $env:USERPROFILE\\vcpkg
           & $env:USERPROFILE\\vcpkg\\bootstrap-vcpkg.bat -disableMetrics
-          Add-Content $env:GITHUB_ENV \"VCPKG_ROOT=$env:USERPROFILE\\vcpkg\"
-          Add-Content $env:GITHUB_ENV \"VCPKG_DEFAULT_TRIPLET=x64-windows\"
-          Add-Content $env:GITHUB_PATH $env:USERPROFILE\\vcpkg
+          Add-Content $env:GITHUB_ENV "VCPKG_ROOT=$env:USERPROFILE\\vcpkg"
+          Add-Content $env:GITHUB_ENV "VCPKG_DEFAULT_TRIPLET=x64-windows"
+          Add-Content $env:GITHUB_PATH "$env:USERPROFILE\\vcpkg"
 
       - name: Install from vcpkg.json when present
         if: ${{ hashFiles('vcpkg.json') != '' }}
         shell: pwsh
         run: |
-          & $env:VCPKG_ROOT\\vcpkg.exe install --triplet x64-windows --overlay-ports=\"$env:GITHUB_WORKSPACE\\ports\" --overlay-triplets=\"$env:GITHUB_WORKSPACE\\triplets\" --clean-after-build --x-download-metrics
+          $vcpkg = "$env:USERPROFILE/vcpkg/vcpkg.exe"
+          & $vcpkg install --triplet x64-windows --overlay-ports="$env:GITHUB_WORKSPACE/ports" --overlay-triplets="$env:GITHUB_WORKSPACE/triplets" --clean-after-build --x-download-metrics
           # 上面 overlay-* 如无则忽略，不影响
 
       - name: Install libs via vcpkg (fallback when no vcpkg.json)
@@ -68,8 +69,9 @@ jobs:
 
       - name: Copy vcpkg DLLs to output
         run: |
-          if (Test-Path "$env:VCPKG_INSTALLATION_ROOT/installed/x64-windows/bin") {
-            Copy-Item "$env:VCPKG_INSTALLATION_ROOT/installed/x64-windows/bin/*" -Destination build/output -Force -ErrorAction SilentlyContinue
+          $dllPath = "$env:USERPROFILE/vcpkg/installed/x64-windows/bin"
+          if (Test-Path $dllPath) {
+            Copy-Item "$dllPath/*" -Destination build/output -Force -ErrorAction SilentlyContinue
           }
 
       - name: Upload artifact
