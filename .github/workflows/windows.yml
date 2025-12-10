@@ -10,7 +10,7 @@ jobs:
     runs-on: windows-latest
     env:
       BUILD_TYPE: Release
-      QT_VERSION: 6.6.3           # 如需对齐本地版本可调整
+      QT_VERSION: 6.6.3 # 如需对齐本地版本可调整
       QT_MODULES: qtbase qttools qtdeclarative qtshadertools
       VCPKG_FEATURE_FLAGS: registries
       VCPKG_DEFAULT_TRIPLET: x64-windows
@@ -32,7 +32,8 @@ jobs:
           runVcpkgInstall: true
 
       - name: Install libs via vcpkg (fallback when no vcpkg.json)
-        if: ${{ !exists('vcpkg.json') }}
+        # hashFiles 返回空字符串表示文件不存在
+        if: ${{ hashFiles('vcpkg.json') == '' }}
         run: |
           vcpkg install opencv[core,imgproc,imgcodecs,highgui,video]:x64-windows
           vcpkg install onnxruntime:x64-windows
