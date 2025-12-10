@@ -25,7 +25,7 @@ jobs:
           aqt install-qt windows desktop $env:QT_VERSION win64_msvc2019_64 --modules $env:QT_MODULES -O C:\Qt
 
       - name: Setup vcpkg
-        uses: microsoft/setup-vcpkg@v1
+        uses: microsoft/setup-vcpkg@v1.2.5
         with:
           vcpkg-json: "${{ github.workspace }}/vcpkg.json"
           triplet: x64-windows
