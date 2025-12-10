@@ -45,8 +45,9 @@ jobs:
         if: ${{ hashFiles('vcpkg.json') == '' }}
         shell: pwsh
         run: |
-          & $env:VCPKG_ROOT\\vcpkg.exe install opencv[core,imgproc,imgcodecs,highgui,video]:x64-windows
-          & $env:VCPKG_ROOT\\vcpkg.exe install onnxruntime:x64-windows
+          $vcpkg = \"$env:USERPROFILE/vcpkg/vcpkg.exe\"
+          & $vcpkg install opencv[core,imgproc,imgcodecs,highgui,video]:x64-windows
+          & $vcpkg install onnxruntime:x64-windows
 
       - name: Configure
         run: >
@@ -54,7 +55,7 @@ jobs:
           -G "Ninja"
           -DCMAKE_BUILD_TYPE=%BUILD_TYPE%
           -DCMAKE_PREFIX_PATH="C:/Qt/%QT_VERSION%/msvc2019_64"
-          -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake
+          -DCMAKE_TOOLCHAIN_FILE=%USERPROFILE%/vcpkg/scripts/buildsystems/vcpkg.cmake
           -DBUILD_TESTING=OFF
 
       - name: Build
