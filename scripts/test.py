@@ -138,7 +138,7 @@ def draw_result(image, results):
 
     for det in results:
         cx1, cy1, w, h, cls_id, score = det
-        
+
         x1 = cx1 - w / 2
         y1 = cy1 - h / 2
 
