@@ -24,19 +24,29 @@ jobs:
           python -m pip install --upgrade pip aqtinstall
           aqt install-qt windows desktop $env:QT_VERSION win64_msvc2019_64 --modules $env:QT_MODULES -O C:\Qt
 
-      - name: Setup vcpkg
-        uses: microsoft/setup-vcpkg@v1.2.5
-        with:
-          vcpkg-json: "${{ github.workspace }}/vcpkg.json"
-          triplet: x64-windows
-          runVcpkgInstall: true
+      - name: Install vcpkg (local bootstrap)
+        shell: pwsh
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git $env:USERPROFILE\\vcpkg
+          & $env:USERPROFILE\\vcpkg\\bootstrap-vcpkg.bat -disableMetrics
+          Add-Content $env:GITHUB_ENV \"VCPKG_ROOT=$env:USERPROFILE\\vcpkg\"
+          Add-Content $env:GITHUB_ENV \"VCPKG_DEFAULT_TRIPLET=x64-windows\"
+          Add-Content $env:GITHUB_PATH $env:USERPROFILE\\vcpkg
+
+      - name: Install from vcpkg.json when present
+        if: ${{ hashFiles('vcpkg.json') != '' }}
+        shell: pwsh
+        run: |
+          & $env:VCPKG_ROOT\\vcpkg.exe install --triplet x64-windows --overlay-ports=\"$env:GITHUB_WORKSPACE\\ports\" --overlay-triplets=\"$env:GITHUB_WORKSPACE\\triplets\" --clean-after-build --x-download-metrics
+          # 上面 overlay-* 如无则忽略，不影响
 
       - name: Install libs via vcpkg (fallback when no vcpkg.json)
         # hashFiles 返回空字符串表示文件不存在
         if: ${{ hashFiles('vcpkg.json') == '' }}
+        shell: pwsh
         run: |
-          vcpkg install opencv[core,imgproc,imgcodecs,highgui,video]:x64-windows
-          vcpkg install onnxruntime:x64-windows
+          & $env:VCPKG_ROOT\\vcpkg.exe install opencv[core,imgproc,imgcodecs,highgui,video]:x64-windows
+          & $env:VCPKG_ROOT\\vcpkg.exe install onnxruntime:x64-windows
 
       - name: Configure
         run: >
@@ -44,7 +54,7 @@ jobs:
           -G "Ninja"
           -DCMAKE_BUILD_TYPE=%BUILD_TYPE%
           -DCMAKE_PREFIX_PATH="C:/Qt/%QT_VERSION%/msvc2019_64"
-          -DCMAKE_TOOLCHAIN_FILE=%VCPKG_INSTALLATION_ROOT%/scripts/buildsystems/vcpkg.cmake
+          -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake
           -DBUILD_TESTING=OFF
 
       - name: Build
