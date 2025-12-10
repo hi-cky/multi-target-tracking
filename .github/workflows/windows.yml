@@ -11,7 +11,7 @@ jobs:
     env:
       BUILD_TYPE: Release
       QT_VERSION: 6.6.3 # 如需对齐本地版本可调整
-      QT_MODULES: qtbase qttools qtdeclarative qtshadertools
+      QT_MODULES: ""
       VCPKG_FEATURE_FLAGS: registries
       VCPKG_DEFAULT_TRIPLET: x64-windows
 
@@ -22,7 +22,7 @@ jobs:
         shell: pwsh
         run: |
           python -m pip install --upgrade pip aqtinstall
-          aqt install-qt windows desktop $env:QT_VERSION win64_msvc2019_64 --modules $env:QT_MODULES -O C:\Qt
+          aqt install-qt windows desktop $env:QT_VERSION win64_msvc2019_64 -O C:\Qt
 
       - name: Install vcpkg (local bootstrap)
         shell: pwsh
