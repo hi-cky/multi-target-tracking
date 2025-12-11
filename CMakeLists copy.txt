@@ -34,23 +34,6 @@ find_package(onnxruntime CONFIG REQUIRED
         /opt/homebrew/Cellar/onnxruntime
 )
 
-# 检测CUDA是否可用（用于GPU加速）
-option(ENABLE_CUDA "启用CUDA GPU加速" OFF)
-if(ENABLE_CUDA)
-    find_package(CUDA QUIET)
-    if(CUDA_FOUND)
-        message(STATUS "CUDA启用: 版本 ${CUDA_VERSION_STRING}")
-        message(STATUS "CUDA工具包: ${CUDA_TOOLKIT_ROOT_DIR}")
-        add_definitions(-DHAVE_CUDA=1)
-        include_directories(${CUDA_INCLUDE_DIRS})
-        # 注意：ONNX Runtime的GPU版本会自己管理CUDA，这里只是检查
-    else()
-        message(WARNING "ENABLE_CUDA已设置但未找到CUDA，CPU模式运行")
-    endif()
-else()
-    message(STATUS "CUDA未启用，使用CPU推理模式")
-endif()
-
 # 自动递归收集 src 目录下的全部 C/C++ 源文件与 Qt 资源文件（子目录修改也会被自动捕获）
 file(GLOB_RECURSE PROJECT_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_SOURCE_DIR}/src/*.c"

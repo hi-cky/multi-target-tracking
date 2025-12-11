@@ -1,6 +1,5 @@
 #pragma once
 
-#include <memory>
 #include <onnxruntime_cxx_api.h>
 #include <opencv2/opencv.hpp>
 #include <string>
@@ -26,12 +25,9 @@ private:
 
     PreprocessResult preprocess(const cv::Mat &frame) const;
     std::vector<BBox> runInference(const PreprocessResult &prep, const cv::Size &original_size) const;
-    static std::vector<BBox> applyNms(const std::vector<
-        BBox> &boxes, float iou_threshold);
+    static std::vector<BBox> applyNms(const std::vector<BBox> &boxes, float iou_threshold);
 
     DetectorConfig config_;
-    Ort::Env &env_;                        // 共享 onnxruntime 环境
-    Ort::SessionOptions session_options_;  // 会话配置（线程/优化级别）
     std::unique_ptr<Ort::Session> session_;  // 推理会话实例
     std::string input_name_;
     std::vector<std::string> output_names_;
