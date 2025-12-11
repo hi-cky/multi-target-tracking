@@ -166,3 +166,5 @@ def draw_result(image, results):
     plt.axis("off")
     plt.show()
 draw_result(canvas, nms(results))
+
+

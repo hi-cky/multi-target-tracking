@@ -48,10 +48,10 @@ void MainWindow::resetEngine(const QString &path) {
         // 统一使用应用目录计算路径，避免工作目录差异导致模型/输出找不到
         // const QString appDir = QCoreApplication::applicationDirPath();
         // 先暂时设置为绝对路径
-        const QString modelDir = "/home/corn/code/c++/multi-target-tracking/model/";
+        const QString modelDir = "/Users/corn/code/c++/multi-target-tracking/model/";
         const std::string yolo_path = (modelDir + "yolo12n.onnx").toStdString();
         const std::string osnet_path = (modelDir + "osnet_x1_0.onnx").toStdString();
-        const std::string csv_path = "/home/corn/code/c++/multi-target-tracking/docs/output.csv";
+        const std::string csv_path = "/Users/corn/code/c++/multi-target-tracking/docs/output.csv";
 
         // 创建检测器
         DetectorConfig dcfg;
