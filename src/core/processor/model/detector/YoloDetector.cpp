@@ -1,6 +1,6 @@
 #include "YoloDetector.h"
 #include "IDetector.h"
-#include "core/processor/OrtEnvSingleton.h"
+#include "../OrtEnvSingleton.h"
 
 #include <algorithm>
 #include <cmath>
@@ -8,52 +8,28 @@
 #include <filesystem>
 #include <numeric>
 #include <stdexcept>
-#include <thread>
-
-namespace {
-
-// ONNX Runtime 在 Windows 下需要 wchar 路径，所以 Windows 下转换成 wstring
-#if defined(_WIN32)
-std::wstring ToOrtPath(const std::string &path) {
-    return std::wstring(path.begin(), path.end());
-}
-#else
-// Linux / macOS 下直接用 string 作为路径
-std::string ToOrtPath(const std::string &path) {
-    return path;
-}
-#endif
-}  // namespace
 
 // --------------------------
 //       构造函数
 // --------------------------
 YoloDetector::YoloDetector(const DetectorConfig &config)
     : config_(config),
-      env_(GetOrtEnv()),
-      session_options_(),
       session_(nullptr) {
 
     // 1. 检查模型路径是否合法
-    if (config_.model_path.empty()) {
+    std::string model_path = config_.ort_env_config.model_path;
+    if (model_path.empty()) {
         throw std::invalid_argument("YoloDetector: 模型路径为空");
     }
 
-    if (!std::filesystem::exists(config_.model_path)) {
-        throw std::runtime_error("YoloDetector: 模型文件不存在 -> " + config_.model_path);
+    if (!std::filesystem::exists(model_path)) {
+        throw std::runtime_error("YoloDetector: 模型文件不存在 -> " + model_path);
     }
 
-    // 2. 设置 Session 参数（图优化、线程数）
-    session_options_.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
-    session_options_.SetIntraOpNumThreads(
-        static_cast<int>(std::max(1u, std::thread::hardware_concurrency()))
-    );
+    // 2. 创建 ONNX 运行时环境
+    session_ = CreateSession(config.ort_env_config);
 
-    // 3. 创建 ONNX Runtime Session
-    auto ort_path = ToOrtPath(config_.model_path);
-    session_ = std::make_unique<Ort::Session>(env_, ort_path.c_str(), session_options_);
-
-    // 4. 获取输入形状、输入名、输出名
+    // 3. 获取输入形状、输入名、输出名
     Ort::AllocatorWithDefaultOptions allocator;
 
     // 获取输入 shape（模型要求的输入维度）

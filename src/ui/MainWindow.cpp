@@ -7,8 +7,9 @@
 #include <QCoreApplication>
 #include <opencv2/imgproc.hpp>
 
+#include "core/processor/model/OrtEnvSingleton.h"
 #include "core/processor/model/detector/YoloDetector.h"
-#include "core/processor/model/feature_extractor/IFeatureExtractor.h"
+#include "core/processor/model/feature_extractor/FeatureExtractor.h"
 #include "core/capture/VideoFrameSource.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
@@ -47,20 +48,22 @@ void MainWindow::resetEngine(const QString &path) {
         // 统一使用应用目录计算路径，避免工作目录差异导致模型/输出找不到
         // const QString appDir = QCoreApplication::applicationDirPath();
         // 先暂时设置为绝对路径
-        const QString modelDir = "/Users/corn/code/c++/multi-target-tracking/model/";
+        const QString modelDir = "/home/corn/code/c++/multi-target-tracking/model/";
         const std::string yolo_path = (modelDir + "yolo12n.onnx").toStdString();
         const std::string osnet_path = (modelDir + "osnet_x1_0.onnx").toStdString();
-        const std::string csv_path = "/Users/corn/code/c++/multi-target-tracking/docs/output.csv";
+        const std::string csv_path = "/home/corn/code/c++/multi-target-tracking/docs/output.csv";
 
         // 创建检测器
         DetectorConfig dcfg;
-        dcfg.model_path = yolo_path;
+        dcfg.ort_env_config.model_path = yolo_path;
+        dcfg.ort_env_config.using_gpu = true;
         auto detector = std::make_unique<YoloDetector>(dcfg);
 
         // 创建特征提取器
         FeatureExtractorConfig fcfg;
-        fcfg.model_path = osnet_path;
-        auto extractor = CreateFeatureExtractor(fcfg);
+        fcfg.ort_env_config.model_path = osnet_path;
+        fcfg.ort_env_config.using_gpu = true;
+        auto extractor = std::make_unique<FeatureExtractor>(fcfg);
 
         TrackingEngine::Config ecfg;
         ecfg.detector = dcfg;

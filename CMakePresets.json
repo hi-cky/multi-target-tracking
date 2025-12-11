@@ -25,6 +25,19 @@
         "CMAKE_PREFIX_PATH": "$env{QT_PATH}",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
       }
+    },
+    {
+      "name": "qt-cuda-debug",
+      "displayName": "Qt CUDA Debug (Ninja)",
+      "description": "使用Ninja构建支持CUDA的Debug版本",
+      "generator": "Ninja",
+      "binaryDir": "build/cuda-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_PREFIX_PATH": "$env{QT_PATH}",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "ENABLE_CUDA": "ON"
+      }
     }
   ],
   "buildPresets": [
@@ -35,6 +48,10 @@
     {
       "name": "qt-release",
       "configurePreset": "qt-release"
+    },
+    {
+      "name": "qt-cuda-debug",
+      "configurePreset": "qt-cuda-debug"
     }
   ]
 }
