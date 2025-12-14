@@ -14,12 +14,22 @@
 // --------------------------
 YoloDetector::YoloDetector(const DetectorConfig &config)
     : config_(config),
+      focus_class_id_set_(),
       session_(nullptr) {
 
     // 1. 检查模型路径是否合法
     std::string model_path = config_.ort_env_config.model_path;
     if (model_path.empty()) {
         throw std::invalid_argument("YoloDetector: 模型路径为空");
+    }
+
+    // 预处理关注类别列表（空列表表示不过滤）
+    // 这样在推理循环里就能用 O(1) 的 unordered_set 查找，避免每次遍历 vector。
+    if (!config_.focus_class_ids.empty()) {
+        focus_class_id_set_.reserve(config_.focus_class_ids.size());
+        for (int id : config_.focus_class_ids) {
+            focus_class_id_set_.insert(id);
+        }
     }
 
     if (!std::filesystem::exists(model_path)) {
@@ -247,6 +257,12 @@ YoloDetector::runInference(const PreprocessResult &prep,
             continue;  // 太小的框不要
         }
 
+        // 中文注释：按关注类别过滤（若 focus_class_id_set_ 为空，则表示不过滤）
+        if (!focus_class_id_set_.empty() &&
+            focus_class_id_set_.find(best_class) == focus_class_id_set_.end()) {
+            continue;
+        }
+
         // cx, cy, w, h 是 YOLO 格式
         const float cx = value_at(i, 0);
         const float cy = value_at(i, 1);
@@ -307,7 +323,7 @@ YoloDetector::applyNms(const std::vector<BBox> &boxes,
 
         picked.emplace_back(boxes[idx]);
 
-        // 对剩余框进行 IoU 判断
+        // 对剩余框进行 IoM（相交部分面积比上较小框面积） 判断
         for (size_t j = i + 1; j < indices.size(); ++j) {
             const int next_idx = indices[j];
             if (suppressed[next_idx]) continue;
@@ -315,7 +331,7 @@ YoloDetector::applyNms(const std::vector<BBox> &boxes,
             // NMS 只抑制同类别框
             if (boxes[idx].class_id != boxes[next_idx].class_id) continue;
 
-            if ((boxes[idx] & boxes[next_idx]) > iou_threshold) {
+            if ((boxes[idx] && boxes[next_idx]) > iou_threshold) {
                 suppressed[next_idx] = true;
             }
         }

@@ -9,7 +9,7 @@
 
 #include "core/processor/TrackingEngine.h"
 #include "core/visualizer/Visualizer.h"
-#include "core/processor/StatsRecorder.h"
+#include "core/recorder/StatsRecorder.h"
 
 class MainWindow : public QMainWindow {
     Q_OBJECT

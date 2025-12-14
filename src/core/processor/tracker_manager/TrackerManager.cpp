@@ -10,6 +10,25 @@ void TrackerManager::predictAll() {
     }
 }
 
+void TrackerManager::fillLabeledFrame(int frame_index, LabeledFrame &outFrame) const {
+    // 将当前健康的 trackers_ 导出为统一的标注结构，供 UI/下游模块使用
+    outFrame.frame_index = frame_index;
+    outFrame.objs.clear();
+    outFrame.objs.reserve(trackers_.size());
+
+    for (const auto &t : trackers_) {
+        if (!t->isHealthy()) continue;
+        const auto &inner = t->getInner();
+
+        LabeledObject obj;
+        obj.id = static_cast<int>(t->id());
+        obj.bbox = inner.box.box;  // cv::Rect2f -> cv::Rect（OpenCV 支持转换/截断）
+        obj.class_id = inner.box.class_id;
+        obj.score = inner.box.score;
+        outFrame.objs.push_back(obj);
+    }
+}
+
 const std::vector<std::unique_ptr<Tracker>> &
 TrackerManager::update(const std::vector<TrackerInner> &detections) {
     // 1) 预测阶段已在外部或通过 predictAll 调用，这里直接拿当前 tracker inner

@@ -48,15 +48,17 @@ void MainWindow::resetEngine(const QString &path) {
         // 统一使用应用目录计算路径，避免工作目录差异导致模型/输出找不到
         // const QString appDir = QCoreApplication::applicationDirPath();
         // 先暂时设置为绝对路径
-        const QString modelDir = "/Users/corn/code/c++/multi-target-tracking/model/";
-        const std::string yolo_path = (modelDir + "yolo12n.onnx").toStdString();
+        const QString modelDir = "/home/corn/code/c++/multi-target-tracking/model/";
+        const std::string yolo_path = (modelDir + "yolo11n.onnx").toStdString();
         const std::string osnet_path = (modelDir + "osnet_x1_0.onnx").toStdString();
-        const std::string csv_path = "/Users/corn/code/c++/multi-target-tracking/docs/output.csv";
+        const std::string csv_path = "/home/corn/code/c++/multi-target-tracking/docs/output.csv";
 
         // 创建检测器
         DetectorConfig dcfg;
         dcfg.ort_env_config.model_path = yolo_path;
         dcfg.ort_env_config.using_gpu = true;
+        dcfg.nms_threshold = 0.7;
+        dcfg.focus_class_ids = {0}; // 只检测人
         auto detector = std::make_unique<YoloDetector>(dcfg);
 
         // 创建特征提取器
@@ -76,6 +78,7 @@ void MainWindow::resetEngine(const QString &path) {
         iterator_ = engine_->run(src.createIterator());
 
         stats_ = std::make_unique<StatsRecorder>(csv_path);
+        stats_->enableExtraStatistics(true);
         video_label_->setText("就绪，点击开始");
     } catch (const std::exception &e) {
         QMessageBox::critical(this, "错误", e.what());

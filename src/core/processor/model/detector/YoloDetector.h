@@ -3,6 +3,7 @@
 #include <onnxruntime_cxx_api.h>
 #include <opencv2/opencv.hpp>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include "IDetector.h"
@@ -28,6 +29,8 @@ private:
     static std::vector<BBox> applyNms(const std::vector<BBox> &boxes, float iou_threshold);
 
     DetectorConfig config_;
+    // 关注类别过滤集合（从 config_.focus_class_ids 预处理而来；空集合表示不过滤）
+    std::unordered_set<int> focus_class_id_set_;
     std::unique_ptr<Ort::Session> session_;  // 推理会话实例
     std::string input_name_;
     std::vector<std::string> output_names_;
