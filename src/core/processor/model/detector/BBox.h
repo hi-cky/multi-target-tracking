@@ -9,6 +9,8 @@ public:
 
     // 计算 IoU，重载 & 运算符，便于 NMS 调用
     float operator&(const BBox &other) const;
+    
+    float operator&&(const BBox &other) const;
 
     // 获取中心点坐标
     cv::Point2f center() const;

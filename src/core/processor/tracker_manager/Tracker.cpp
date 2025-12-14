@@ -84,14 +84,19 @@ bool Tracker::updateAsHitting(const TrackerInner &detection) {
     }
     inner_.feature = Feature(std::move(fused)).normalized();
 
-    consecutive_misses_ = 0;
-    life_ = std::min(cfg_.max_life, life_ + 1);
+    consecutive_hits_ = std::min(3, consecutive_hits_ + 1);
+    life_ = std::min(cfg_.max_life, life_ + (1 << consecutive_hits_));
     return true;
 }
 
 bool Tracker::updateAsMissing() {
-    consecutive_misses_ += 1;
-    int decay = 1 << consecutive_misses_;
-    life_ = std::max(0, life_ - decay);
+    consecutive_hits_ = 0;
+    life_ = std::max(0, life_ - 1);
     return life_ == 0;
+}
+
+
+bool Tracker::isHealthy() {
+    // return life_ > 0;
+    return life_ == cfg_.max_life; // 改为如果当前是满血则视为健康
 }

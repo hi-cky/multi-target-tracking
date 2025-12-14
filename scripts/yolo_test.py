@@ -168,3 +168,8 @@ def draw_result(image, results):
 draw_result(canvas, nms(results))
 
 
+# %%
+from ultralytics.models import YOLO
+
+# 使用YOLO模型进行目标检测
+model = YOLO("../model/yolov11n.pt")  # 加载预训练模型
