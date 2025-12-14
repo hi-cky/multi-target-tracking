@@ -43,19 +43,11 @@ public:
         }
 
         // 4) 更新轨迹
-        const auto &tracks = tracker_mgr_.update(dets);
+        tracker_mgr_.update(dets);
 
-        // 5) 输出当前帧的标注
-        outFrame.frame_index = frame_index_;
-        outFrame.objs.clear();
-        for (const auto &t : tracks) {
-            LabeledObject obj;
-            obj.id = static_cast<int>(t->id());
-            obj.bbox = t->getInner().box.box;
-            obj.class_id = t->getInner().box.class_id;
-            obj.score = t->getInner().box.score;
-            outFrame.objs.push_back(obj);
-        }
+        // 5) 输出当前帧的标注（统一由 TrackerManager 负责组装，避免各处重复实现）
+        // update 返回值可用于调试/扩展；当前输出直接从 tracker_mgr_ 导出
+        tracker_mgr_.fillLabeledFrame(frame_index_, outFrame);
 
         ++frame_index_;
         return true;

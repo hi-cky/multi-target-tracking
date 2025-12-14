@@ -30,57 +30,6 @@ Ort::Env& GetOrtEnv() {
     return env;
 }
 
-bool HasCudaGPU() {
-    static bool has_cuda = false;
-    static bool checked = false;
-    if (checked) return has_cuda;
-
-#ifdef _WIN32
-    // Windows：尝试加载 cuda.dll
-    HMODULE hCuda = LoadLibraryA("nvcuda.dll");  // 一般是 nvcuda.dll
-    if (hCuda) {
-        has_cuda = true;
-        FreeLibrary(hCuda);
-    }
-#else
-    // Linux / WSL
-
-    // 1. 优先尝试 libcuda.so.1（更符合实际情况）
-    void* handle = dlopen("libcuda.so.1", RTLD_LAZY);
-    if (!handle) {
-        // 2. WSL 特判：尝试从 /usr/lib/wsl/lib 直接加载
-        handle = dlopen("/usr/lib/wsl/lib/libcuda.so.1", RTLD_LAZY);
-    }
-
-    if (handle) {
-        has_cuda = true;
-        dlclose(handle);
-    }
-
-    // （可选）普通 Linux 再兜底试试 libcuda.so
-    if (!has_cuda) {
-        void* h2 = dlopen("libcuda.so", RTLD_LAZY);
-        if (h2) {
-            has_cuda = true;
-            dlclose(h2);
-        }
-    }
-#endif
-
-    // 环境变量这一条在 Linux/WSL 基本没什么用，可以只在 Windows 上留
-#ifdef _WIN32
-    if (!has_cuda) {
-        const char* cuda_path = std::getenv("CUDA_PATH");
-        if (cuda_path && cuda_path[0] != '\0') {
-            has_cuda = true;
-        }
-    }
-#endif
-
-    checked = true;
-    return has_cuda;
-}
-
 std::unique_ptr<Ort::Session> CreateSession(const OrtEnvConfig& config){
 
     // 3. 创建 ONNX Runtime Session
@@ -101,7 +50,7 @@ std::unique_ptr<Ort::Session> CreateSession(const OrtEnvConfig& config){
         session_opts.EnableCpuMemArena();
         
         
-        if (config.using_gpu && HasCudaGPU()) { // 如果检测出来没有gpu， 则默认使用cpu
+        if (config.using_gpu) { 
             OrtCUDAProviderOptions cuda_options{};
             cuda_options.device_id = config.device_id;
             cuda_options.arena_extend_strategy = 0;  // kNextPowerOfTwo
@@ -116,6 +65,6 @@ std::unique_ptr<Ort::Session> CreateSession(const OrtEnvConfig& config){
         
     } catch (const Ort::Exception& e) {
         std::cerr << "[ERROR] 模型加载失败: " << e.what() << std::endl;
-        throw std::runtime_error("FeatureExtractor: 模型加载失败." + std::string(e.what()));
+        throw std::runtime_error("FeatureExtractor: 模型加载失败。请检查 CUDA 环境和相关配置是否正常！");
     }
 }

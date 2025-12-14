@@ -73,7 +73,7 @@ else:
 # %% 直观感受一下输出的每个框
 PROB_THR = 0.25
 
-results = output[0].transpose((1, 0))
+results = output[0].transpose((1, 0))  # type: ignore
 print(results.shape)
 
 for result in results:
@@ -168,3 +168,8 @@ def draw_result(image, results):
 draw_result(canvas, nms(results))
 
 
+# %%
+from ultralytics.models import YOLO
+
+# 使用YOLO模型进行目标检测
+model = YOLO("../model/yolov11n.pt")  # 加载预训练模型

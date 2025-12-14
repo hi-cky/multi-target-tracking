@@ -5,7 +5,7 @@
 #include "../structure/TrackerInner.h"
 
 struct TrackerConfig {
-    int max_life = 30;          // life 上限
+    int max_life = 90;          // life 上限
     float feature_momentum = 0.7f; // 新特征的占比（EMA）
 };
 
@@ -19,6 +19,9 @@ public:
     bool updateAsHitting(const TrackerInner &detection);
     // 未命中更新，life 减少；若归零返回 true 表示应清除
     bool updateAsMissing();
+    
+    // 是否健康（健康即可以输出这个Tracker的预测结果，否则就暂时隐藏这个Tracker的预测结果）
+    bool isHealthy();
 
     size_t id() const { return id_; }
     const TrackerInner &getInner() const { return inner_; }
@@ -33,7 +36,7 @@ private:
     TrackerConfig cfg_{};
 
     int life_ = 0;
-    int consecutive_misses_ = 0;
+    int consecutive_hits_ = 0;
 
     cv::KalmanFilter kf_;
 };
