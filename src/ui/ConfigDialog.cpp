@@ -38,66 +38,68 @@ AppConfig ConfigDialog::config() const {
 
 void ConfigDialog::loadToUi_(const AppConfig &cfg) {
     // Detector
-    ui_->detectorInputWidthSpin->setValue(cfg.detector.input_width);
-    ui_->detectorInputHeightSpin->setValue(cfg.detector.input_height);
-    ui_->detectorScoreThrSpin->setValue(cfg.detector.score_threshold);
-    ui_->detectorNmsThrSpin->setValue(cfg.detector.nms_threshold);
-    ui_->detectorFocusIdsEdit->setText(joinIntList_(cfg.detector.focus_class_ids));
-    ui_->detectorModelPathEdit->setText(QString::fromStdString(cfg.detector.ort_env_config.model_path));
-    ui_->detectorUseGpuCheck->setChecked(cfg.detector.ort_env_config.using_gpu);
-    ui_->detectorDeviceIdSpin->setValue(cfg.detector.ort_env_config.device_id);
-    ui_->detectorGpuMemSpin->setValue(static_cast<double>(cfg.detector.ort_env_config.gpu_mem_limit) / (1024.0 * 1024.0));
+    ui_->detectorInputWidthSpin->setValue(cfg.engine.detector.input_width);
+    ui_->detectorInputHeightSpin->setValue(cfg.engine.detector.input_height);
+    ui_->detectorScoreThrSpin->setValue(cfg.engine.detector.score_threshold);
+    ui_->detectorNmsThrSpin->setValue(cfg.engine.detector.nms_threshold);
+    ui_->detectorFocusIdsEdit->setText(joinIntList_(cfg.engine.detector.focus_class_ids));
+    ui_->detectorModelPathEdit->setText(QString::fromStdString(cfg.engine.detector.ort_env_config.model_path));
+    ui_->detectorUseGpuCheck->setChecked(cfg.engine.detector.ort_env_config.using_gpu);
+    ui_->detectorDeviceIdSpin->setValue(cfg.engine.detector.ort_env_config.device_id);
+    ui_->detectorGpuMemSpin->setValue(static_cast<double>(cfg.engine.detector.ort_env_config.gpu_mem_limit) / (1024.0 * 1024.0));
 
     // Feature
-    ui_->featureInputWidthSpin->setValue(cfg.feature.input_width);
-    ui_->featureInputHeightSpin->setValue(cfg.feature.input_height);
-    ui_->featureModelPathEdit->setText(QString::fromStdString(cfg.feature.ort_env_config.model_path));
-    ui_->featureUseGpuCheck->setChecked(cfg.feature.ort_env_config.using_gpu);
-    ui_->featureDeviceIdSpin->setValue(cfg.feature.ort_env_config.device_id);
-    ui_->featureGpuMemSpin->setValue(static_cast<double>(cfg.feature.ort_env_config.gpu_mem_limit) / (1024.0 * 1024.0));
+    ui_->featureInputWidthSpin->setValue(cfg.engine.extractor.input_width);
+    ui_->featureInputHeightSpin->setValue(cfg.engine.extractor.input_height);
+    ui_->featureModelPathEdit->setText(QString::fromStdString(cfg.engine.extractor.ort_env_config.model_path));
+    ui_->featureUseGpuCheck->setChecked(cfg.engine.extractor.ort_env_config.using_gpu);
+    ui_->featureDeviceIdSpin->setValue(cfg.engine.extractor.ort_env_config.device_id);
+    ui_->featureGpuMemSpin->setValue(static_cast<double>(cfg.engine.extractor.ort_env_config.gpu_mem_limit) / (1024.0 * 1024.0));
 
     // Tracker
-    ui_->trackerIouWeightSpin->setValue(cfg.tracker_mgr.iou_weight);
-    ui_->trackerFeatWeightSpin->setValue(cfg.tracker_mgr.feature_weight);
-    ui_->trackerMatchThrSpin->setValue(cfg.tracker_mgr.match_threshold);
-    ui_->trackerMaxLifeSpin->setValue(cfg.tracker_mgr.max_life);
-    ui_->trackerMomentumSpin->setValue(cfg.tracker_mgr.feature_momentum);
+    ui_->trackerIouWeightSpin->setValue(cfg.engine.tracker_mgr.matcher_cfg.iou_weight);
+    ui_->trackerFeatWeightSpin->setValue(cfg.engine.tracker_mgr.matcher_cfg.feature_weight);
+    ui_->trackerMatchThrSpin->setValue(cfg.engine.tracker_mgr.matcher_cfg.threshold);
+    ui_->trackerMaxLifeSpin->setValue(cfg.engine.tracker_mgr.tracker_cfg.max_life);
+    ui_->trackerMomentumSpin->setValue(cfg.engine.tracker_mgr.tracker_cfg.feature_momentum);
 
-    // Misc
-    ui_->statsCsvPathEdit->setText(QString::fromStdString(cfg.stats_csv_path));
+    // Recorder
+    ui_->statsCsvPathEdit->setText(QString::fromStdString(cfg.recorder.stats_csv_path));
+    ui_->statsExtraCheck->setChecked(cfg.recorder.enable_extra_statistics);
 }
 
 AppConfig ConfigDialog::readFromUi_() const {
     AppConfig cfg;
 
     // Detector
-    cfg.detector.input_width = ui_->detectorInputWidthSpin->value();
-    cfg.detector.input_height = ui_->detectorInputHeightSpin->value();
-    cfg.detector.score_threshold = static_cast<float>(ui_->detectorScoreThrSpin->value());
-    cfg.detector.nms_threshold = static_cast<float>(ui_->detectorNmsThrSpin->value());
-    cfg.detector.focus_class_ids = parseIntList_(ui_->detectorFocusIdsEdit->text());
-    cfg.detector.ort_env_config.model_path = ui_->detectorModelPathEdit->text().toStdString();
-    cfg.detector.ort_env_config.using_gpu = ui_->detectorUseGpuCheck->isChecked();
-    cfg.detector.ort_env_config.device_id = ui_->detectorDeviceIdSpin->value();
-    cfg.detector.ort_env_config.gpu_mem_limit = static_cast<size_t>(ui_->detectorGpuMemSpin->value() * 1024.0 * 1024.0);
+    cfg.engine.detector.input_width = ui_->detectorInputWidthSpin->value();
+    cfg.engine.detector.input_height = ui_->detectorInputHeightSpin->value();
+    cfg.engine.detector.score_threshold = static_cast<float>(ui_->detectorScoreThrSpin->value());
+    cfg.engine.detector.nms_threshold = static_cast<float>(ui_->detectorNmsThrSpin->value());
+    cfg.engine.detector.focus_class_ids = parseIntList_(ui_->detectorFocusIdsEdit->text());
+    cfg.engine.detector.ort_env_config.model_path = ui_->detectorModelPathEdit->text().toStdString();
+    cfg.engine.detector.ort_env_config.using_gpu = ui_->detectorUseGpuCheck->isChecked();
+    cfg.engine.detector.ort_env_config.device_id = ui_->detectorDeviceIdSpin->value();
+    cfg.engine.detector.ort_env_config.gpu_mem_limit = static_cast<size_t>(ui_->detectorGpuMemSpin->value() * 1024.0 * 1024.0);
 
     // Feature
-    cfg.feature.input_width = ui_->featureInputWidthSpin->value();
-    cfg.feature.input_height = ui_->featureInputHeightSpin->value();
-    cfg.feature.ort_env_config.model_path = ui_->featureModelPathEdit->text().toStdString();
-    cfg.feature.ort_env_config.using_gpu = ui_->featureUseGpuCheck->isChecked();
-    cfg.feature.ort_env_config.device_id = ui_->featureDeviceIdSpin->value();
-    cfg.feature.ort_env_config.gpu_mem_limit = static_cast<size_t>(ui_->featureGpuMemSpin->value() * 1024.0 * 1024.0);
+    cfg.engine.extractor.input_width = ui_->featureInputWidthSpin->value();
+    cfg.engine.extractor.input_height = ui_->featureInputHeightSpin->value();
+    cfg.engine.extractor.ort_env_config.model_path = ui_->featureModelPathEdit->text().toStdString();
+    cfg.engine.extractor.ort_env_config.using_gpu = ui_->featureUseGpuCheck->isChecked();
+    cfg.engine.extractor.ort_env_config.device_id = ui_->featureDeviceIdSpin->value();
+    cfg.engine.extractor.ort_env_config.gpu_mem_limit = static_cast<size_t>(ui_->featureGpuMemSpin->value() * 1024.0 * 1024.0);
 
     // Tracker
-    cfg.tracker_mgr.iou_weight = ui_->trackerIouWeightSpin->value();
-    cfg.tracker_mgr.feature_weight = ui_->trackerFeatWeightSpin->value();
-    cfg.tracker_mgr.match_threshold = ui_->trackerMatchThrSpin->value();
-    cfg.tracker_mgr.max_life = ui_->trackerMaxLifeSpin->value();
-    cfg.tracker_mgr.feature_momentum = ui_->trackerMomentumSpin->value();
+    cfg.engine.tracker_mgr.matcher_cfg.iou_weight = ui_->trackerIouWeightSpin->value();
+    cfg.engine.tracker_mgr.matcher_cfg.feature_weight = ui_->trackerFeatWeightSpin->value();
+    cfg.engine.tracker_mgr.matcher_cfg.threshold = ui_->trackerMatchThrSpin->value();
+    cfg.engine.tracker_mgr.tracker_cfg.max_life = ui_->trackerMaxLifeSpin->value();
+    cfg.engine.tracker_mgr.tracker_cfg.feature_momentum = ui_->trackerMomentumSpin->value();
 
-    // Misc
-    cfg.stats_csv_path = ui_->statsCsvPathEdit->text().toStdString();
+    // Recorder
+    cfg.recorder.stats_csv_path = ui_->statsCsvPathEdit->text().toStdString();
+    cfg.recorder.enable_extra_statistics = ui_->statsExtraCheck->isChecked();
 
     return cfg;
 }

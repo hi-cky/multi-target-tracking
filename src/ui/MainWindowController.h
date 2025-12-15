@@ -6,10 +6,11 @@
 #include <memory>
 
 #include "config/AppConfig.h"
-#include "core/processor/TrackingEngine.h"
+#include "config/ConfigManager.h"
+#include "core/engine/TrackingEngine.h"
 #include "core/visualizer/Visualizer.h"
 #include "core/recorder/StatsRecorder.h"
-#include "core/processor/ILabeledDataIterator.h"
+#include "core/engine/ILabeledDataIterator.h"
 
 class MainWindowView;
 
@@ -36,6 +37,7 @@ private:
     MainWindowView *view_ = nullptr;
     QTimer timer_;
 
+    ConfigManager cfg_mgr_;
     AppConfig config_;
     QString current_video_path_;
 
@@ -45,4 +47,3 @@ private:
     std::unique_ptr<StatsRecorder> stats_;
     int frame_index_ = 0;
 };
-

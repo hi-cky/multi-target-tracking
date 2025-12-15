@@ -28,4 +28,3 @@ private:
 
     Ui::ConfigDialog *ui_ = nullptr;
 };
-

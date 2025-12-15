@@ -1,8 +1,13 @@
 #pragma once
 
 #include <opencv2/video/tracking.hpp>
+#include "../model/detector/BBox.h"
+#include "../model/feature_extractor/Feature.h"
 
-#include "../structure/TrackerInner.h"
+struct TrackerInner {
+    BBox box;
+    Feature feature;
+};
 
 struct TrackerConfig {
     int max_life = 90;          // life 上限

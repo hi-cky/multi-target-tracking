@@ -4,15 +4,12 @@
 #include <vector>
 
 #include "Tracker.h"
+#include "matcher/IMatcher.h"
 #include "structure/LabeledData.h"
-#include "../matcher/IMatcher.h"
 
 struct TrackerManagerConfig {
-    float iou_weight = 0.5f;
-    float feature_weight = 0.5f;
-    float match_threshold = 0.5f;
-    int max_life = 30;
-    float feature_momentum = 0.7f;
+    MatcherConfig matcher_cfg;
+    TrackerConfig tracker_cfg;
 };
 
 class TrackerManager {
@@ -27,8 +24,6 @@ public:
     // 中文注释：获取当前所有 Tracker 的“预测/更新后”结果，并组装成统一的 LabeledFrame
     // 说明：该方法只负责把 trackers_ 的当前状态导出；Tracker 的 predict/update 仍由外部时序控制。
     void fillLabeledFrame(int frame_index, LabeledFrame &outFrame) const;
-
-    const std::vector<std::unique_ptr<Tracker>> &trackers() const { return trackers_; }
 
 private:
     TrackerManagerConfig cfg_;

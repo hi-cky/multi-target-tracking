@@ -1,4 +1,4 @@
-#include "core/processor/model/detector/BBox.h"
+#include "BBox.h"
 
 float BBox::operator&(const BBox &other) const {
     const float intersect_w = std::max(0.0F, std::min(box.br().x, other.box.br().x) - std::max(box.tl().x, other.box.tl().x));

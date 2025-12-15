@@ -1,8 +1,9 @@
 #include "TrackerManager.h"
+#include "matcher/Matcher.h"
 
-TrackerManager::TrackerManager(const TrackerManagerConfig &cfg) : cfg_(cfg) {
-    matcher_ = CreateMatcher(cfg_.iou_weight, cfg_.feature_weight, cfg_.match_threshold);
-}
+TrackerManager::TrackerManager(const TrackerManagerConfig &cfg) :
+    cfg_(cfg), 
+    matcher_(std::make_unique<Matcher>(cfg.matcher_cfg)) {}
 
 void TrackerManager::predictAll() {
     for (auto &t : trackers_) {
@@ -36,7 +37,7 @@ TrackerManager::update(const std::vector<TrackerInner> &detections) {
     current.reserve(trackers_.size());
     for (auto &t : trackers_) current.push_back(t->getInner());
 
-    // 2) 进行匹配
+    // 2) 匹配
     auto matches = matcher_->match(current, detections);
 
     std::vector<char> det_used(detections.size(), 0);
@@ -68,10 +69,7 @@ TrackerManager::update(const std::vector<TrackerInner> &detections) {
     // 4) 为未匹配的检测创建新 tracker
     for (size_t d = 0; d < detections.size(); ++d) {
         if (det_used[d]) continue;
-        TrackerConfig tc;
-        tc.max_life = cfg_.max_life;
-        tc.feature_momentum = cfg_.feature_momentum;
-        trackers_.push_back(std::make_unique<Tracker>(next_id_++, detections[d], tc));
+        trackers_.push_back(std::make_unique<Tracker>(next_id_++, detections[d], cfg_.tracker_cfg));
     }
 
     return trackers_;

@@ -5,13 +5,13 @@
 // 注意：以下包含需要替换为你们实际项目中定义 LabeledFrame/LabeledObject 的头文件
 // #include "AppendixA.h" // 替换为实际头文件路径
 
-StatsRecorder::StatsRecorder(const std::string &path)
-    : wroteHeader(false), enableExtraStats(false), uniqueIdsSeen(0)
+StatsRecorder::StatsRecorder(const RecorderConfig &cfg)
+    : cfg_(cfg), wroteHeader(false), enableExtraStats(cfg.enable_extra_statistics), uniqueIdsSeen(0)
 {
-    out.open(path.c_str(), std::ofstream::out | std::ofstream::trunc);
+    out.open(cfg.stats_csv_path.c_str(), std::ofstream::out | std::ofstream::trunc);
     if (!out.is_open())
     {
-        throw std::runtime_error("Cannot open stats file: " + path);
+        throw std::runtime_error("Cannot open stats file: " + cfg.stats_csv_path);
     }
 }
 
