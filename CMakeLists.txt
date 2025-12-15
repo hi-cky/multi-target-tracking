@@ -102,15 +102,15 @@ if (BUILD_TESTING)
     if (UNIT_TEST_SOURCES)
         add_executable(detector_tests ${UNIT_TEST_SOURCES})
         target_sources(detector_tests PRIVATE
-            ${CMAKE_SOURCE_DIR}/src/core/processor/model/detector/YoloDetector.cpp
-            ${CMAKE_SOURCE_DIR}/src/core/processor/model/detector/BBox.cpp
-            ${CMAKE_SOURCE_DIR}/src/core/processor/model/feature_extractor/FeatureExtractor.cpp
-            ${CMAKE_SOURCE_DIR}/src/core/processor/model/feature_extractor/Feature.cpp
-            ${CMAKE_SOURCE_DIR}/src/core/processor/matcher/Matcher.cpp
-            ${CMAKE_SOURCE_DIR}/src/core/processor/tracker_manager/Tracker.cpp
-            ${CMAKE_SOURCE_DIR}/src/core/processor/tracker_manager/TrackerManager.cpp
-            ${CMAKE_SOURCE_DIR}/src/core/processor/TrackingEngine.cpp
-            ${CMAKE_SOURCE_DIR}/src/core/processor/OrtEnvSingleton.cpp
+            ${CMAKE_SOURCE_DIR}/src/core/engine/model/detector/YoloDetector.cpp
+            ${CMAKE_SOURCE_DIR}/src/core/engine/model/detector/BBox.cpp
+            ${CMAKE_SOURCE_DIR}/src/core/engine/model/feature_extractor/FeatureExtractor.cpp
+            ${CMAKE_SOURCE_DIR}/src/core/engine/model/feature_extractor/Feature.cpp
+            ${CMAKE_SOURCE_DIR}/src/core/engine/tracker_manager/matcher/Matcher.cpp
+            ${CMAKE_SOURCE_DIR}/src/core/engine/tracker_manager/Tracker.cpp
+            ${CMAKE_SOURCE_DIR}/src/core/engine/tracker_manager/TrackerManager.cpp
+            ${CMAKE_SOURCE_DIR}/src/core/engine/TrackingEngine.cpp
+            ${CMAKE_SOURCE_DIR}/src/core/engine/model/OrtEnvSingleton.cpp
         )
         target_link_libraries(detector_tests PRIVATE gtest_main Qt6::Widgets ${OPENCV_NEEDED_LIBS} onnxruntime::onnxruntime)
         target_include_directories(detector_tests PRIVATE ${CMAKE_SOURCE_DIR}/src)

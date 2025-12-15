@@ -11,13 +11,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--weights",
         type=Path,
-        default=Path("model/yolo12n.pt"),
+        default=Path("model/yolov8n.pt"),
         help="过程级别中文注释：指定待转换的 .pt 权重路径",
     )
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("model/yolo12n.onnx"),
+        default=Path("model/yolov8n.onnx"),
         help="过程级别中文注释：指定导出的 ONNX 保存位置",
     )
     parser.add_argument(
