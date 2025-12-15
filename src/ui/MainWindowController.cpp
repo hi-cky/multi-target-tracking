@@ -136,7 +136,7 @@ void MainWindowController::onTick_() {
 
     if (stats_) stats_->consume(lf);
 
-    const cv::Mat &raw = iterator_->lastFrame();
+    const cv::Mat &raw = iterator_->getFrame();
     cv::Mat vis = viz_.render(raw, lf);
     showMat_(vis);
     ++frame_index_;

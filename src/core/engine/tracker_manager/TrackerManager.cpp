@@ -11,11 +11,11 @@ void TrackerManager::predictAll() {
     }
 }
 
-void TrackerManager::fillLabeledFrame(int frame_index, LabeledFrame &outFrame) const {
+void TrackerManager::fillLabeledFrame(int frame_index, LabeledFrame &label) const {
     // 将当前健康的 trackers_ 导出为统一的标注结构，供 UI/下游模块使用
-    outFrame.frame_index = frame_index;
-    outFrame.objs.clear();
-    outFrame.objs.reserve(trackers_.size());
+    label.frame_index = frame_index;
+    label.objs.clear();
+    label.objs.reserve(trackers_.size());
 
     for (const auto &t : trackers_) {
         if (!t->isHealthy()) continue;
@@ -26,7 +26,7 @@ void TrackerManager::fillLabeledFrame(int frame_index, LabeledFrame &outFrame) c
         obj.bbox = inner.box.box;  // cv::Rect2f -> cv::Rect（OpenCV 支持转换/截断）
         obj.class_id = inner.box.class_id;
         obj.score = inner.box.score;
-        outFrame.objs.push_back(obj);
+        label.objs.push_back(obj);
     }
 }
 

@@ -7,5 +7,5 @@ public:
     virtual ~ILabeledDataIterator() = default;
     virtual bool hasNext() const = 0;
     virtual bool next(LabeledFrame &outFrame) = 0;
-    virtual const cv::Mat &lastFrame() const = 0;
+    virtual const cv::Mat &getFrame() const = 0;
 };

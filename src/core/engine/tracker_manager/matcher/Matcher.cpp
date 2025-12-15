@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <vector>
+#include <cmath>
 
 namespace {
 // 计算 IoU，直接复用 BBox 的 & 运算符
@@ -28,8 +29,16 @@ std::vector<std::pair<int, int>> Matcher::match(const std::vector<TrackerInner> 
     for (int i = 0; i < static_cast<int>(left.size()); ++i) {
         for (int j = 0; j < static_cast<int>(right.size()); ++j) {
             const float iou = IoU(left[i].box, right[j].box);
-            const float cos = Cosine(left[i].feature, right[j].feature);
-            const float w = (cfg_.iou_weight * iou + cfg_.feature_weight * cos) / norm_;
+            float cos = Cosine(left[i].feature, right[j].feature);
+            // 余弦相似度 [-1,1] 映射到 [0,1]，避免负值导致匹配异常
+            cos = 0.5f * (cos + 1.0f);
+
+            // 攻防：使用加权 noisy-or，高分项会显著抬高整体，降低丢框风险
+            const float wi = cfg_.iou_weight / norm_;
+            const float wf = cfg_.feature_weight / norm_;
+            const float w = 1.0f
+                - std::pow(std::max(1.0f - iou, 0.0f), wi)
+                * std::pow(std::max(1.0f - cos, 0.0f), wf);
             if (w >= cfg_.threshold) {
                 // 将满足阈值条件的匹配分数和索引加入候选列表
                 scores.emplace_back(w, i, j);

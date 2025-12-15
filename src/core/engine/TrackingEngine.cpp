@@ -23,42 +23,45 @@ public:
 
     bool hasNext() const override { return image_iter_ && image_iter_->hasNext(); }
 
-    bool next(LabeledFrame &outFrame) override {
+    bool next(LabeledFrame &label) override {
         if (!image_iter_ || !image_iter_->hasNext()) return false;
-        if (!image_iter_->next(last_frame_)) return false;
-
+        if (!image_iter_->next(frame_)) return false;
+        
+        // ===卡尔曼滤波根据上一帧的状态对这一帧的结果进行预测===
         // 1) 预测所有轨迹
         tracker_mgr_->predictAll();
+        
+        // 2) 输出所有traker对于当前这一帧的预测结果（统一由 TrackerManager 负责组装，避免各处重复实现）
+        // update 返回值可用于调试/扩展；当前输出直接从 tracker_mgr_ 导出
+        tracker_mgr_->fillLabeledFrame(frame_index_, label);
 
-        // 2-1) 检测边界框
-        auto boxes = detector_->detect(last_frame_, frame_index_);
+        
+        // ===对当前这一帧进行检测和特征提取，更新跟踪器的状态
+        // 3-1) 检测边界框
+        auto boxes = detector_->detect(frame_, frame_index_);
 
-        // 2-2) 为检测框抽特征
+        // 3-2) 为检测框抽特征
         std::vector<TrackerInner> dets;
         dets.reserve(boxes.size());
         for (auto &b : boxes) {
             // 裁剪区域；若超界则 clip
-            cv::Rect2f roi_f = b.box & cv::Rect2f(0, 0, static_cast<float>(last_frame_.cols), static_cast<float>(last_frame_.rows));
+            cv::Rect2f roi_f = b.box & cv::Rect2f(0, 0, static_cast<float>(frame_.cols), static_cast<float>(frame_.rows));
             if (roi_f.width <= 0 || roi_f.height <= 0) continue;
             cv::Rect roi(cv::Point(static_cast<int>(roi_f.x), static_cast<int>(roi_f.y)),
                          cv::Size(static_cast<int>(roi_f.width), static_cast<int>(roi_f.height)));
-            cv::Mat patch = last_frame_(roi).clone();
+            cv::Mat patch = frame_(roi).clone();
             auto feat_vec = extractor_->extract(patch);
             dets.push_back(TrackerInner{b, Feature(std::move(feat_vec))});
         }
 
-        // 3) 更新轨迹
+        // 4) 更新所有tracker的状态
         tracker_mgr_->update(dets);
-
-        // 4) 输出当前帧的标注（统一由 TrackerManager 负责组装，避免各处重复实现）
-        // update 返回值可用于调试/扩展；当前输出直接从 tracker_mgr_ 导出
-        tracker_mgr_->fillLabeledFrame(frame_index_, outFrame);
 
         ++frame_index_;
         return true;
     }
 
-    const cv::Mat &lastFrame() const override { return last_frame_; }
+    const cv::Mat &getFrame() const override { return frame_; }
 
 private:
     std::unique_ptr<IImageIterator> image_iter_;
@@ -66,7 +69,7 @@ private:
     std::unique_ptr<IFeatureExtractor> extractor_;
     std::unique_ptr<TrackerManager> tracker_mgr_;
     int frame_index_ = 0;
-    cv::Mat last_frame_;
+    cv::Mat frame_;
 };
 }  // namespace
 
