@@ -7,6 +7,7 @@
 struct TrackerInner {
     BBox box;
     Feature feature;
+    int age = 0;
 };
 
 struct TrackerConfig {

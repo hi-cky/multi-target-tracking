@@ -30,4 +30,9 @@ private:
     std::unique_ptr<IMatcher> matcher_;
     std::vector<std::unique_ptr<Tracker>> trackers_;
     size_t next_id_ = 0;
+    
+    std::vector<TrackerInner> pending_dets_;
+    
+    std::vector<TrackerInner> currentTrackerInners();
+    void addNewDetections(const std::vector<TrackerInner> &detections);
 };
