@@ -323,7 +323,7 @@ YoloDetector::applyNms(const std::vector<BBox> &boxes,
 
         picked.emplace_back(boxes[idx]);
 
-        // 对剩余框进行 IoM（相交部分面积比上较小框面积） 判断
+        // 对剩余框进行 IoU 判断
         for (size_t j = i + 1; j < indices.size(); ++j) {
             const int next_idx = indices[j];
             if (suppressed[next_idx]) continue;
@@ -331,7 +331,7 @@ YoloDetector::applyNms(const std::vector<BBox> &boxes,
             // NMS 只抑制同类别框
             if (boxes[idx].class_id != boxes[next_idx].class_id) continue;
 
-            if ((boxes[idx] && boxes[next_idx]) > iou_threshold) {
+            if ((boxes[idx] & boxes[next_idx]) > iou_threshold) {
                 suppressed[next_idx] = true;
             }
         }

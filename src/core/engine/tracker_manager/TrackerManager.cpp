@@ -45,6 +45,7 @@ TrackerManager::update(const std::vector<TrackerInner> &detections) {
     std::vector<char> det_used(pending_dets_.size(), 0);
     for (auto [ti, di] : matches) {
         if (ti < 0 || ti >= static_cast<int>(trackers_.size())) continue;
+        if (di < 0 || di >= static_cast<int>(pending_dets_.size())) continue;
         
         // 如果 pending_det 的 age 小于 2，则更新 tracker（避免age为2的状态不新鲜）
         if (pending_dets_[di].age < 2) {
@@ -53,7 +54,8 @@ TrackerManager::update(const std::vector<TrackerInner> &detections) {
         // 然后将其标记为本轮已匹配
         det_used[di] = 1;
         // 同时将其标记为丢弃，避免下一轮再次被匹配到
-        pending_dets_[di].age = INT_MAX;
+        // 中文注释：这里用一个很大的 age 作为“已消费”标记，下一轮会在 addNewDetections 里被过滤掉
+        pending_dets_[di].age = 1000000000;
     }
 
     // 3) 对未匹配的 tracker 做 missed 更新，标记清除
@@ -101,30 +103,37 @@ std::vector<TrackerInner> TrackerManager::currentTrackerInners() {
 void TrackerManager::addNewDetections(const std::vector<TrackerInner> &detections) {
     // 1) 先和已经存在的 pending_dets 匹配一下
     auto matches = matcher_->match(pending_dets_, detections);
-    std::vector<char> det_used(detections.size(), 0);
     
     std::vector<TrackerInner> new_pending_dets;
     
-    // 2) 记录重复的det
-    std::vector<bool> repeated_old_pending_dets(pending_dets_.size(), false);
-    for (auto &m : matches) {
-        // 注意 m.first 对应 pending_dets_ 的索引，不能与 detections.size() 混用
+    // 2) 记录哪些“新检测”被旧 pending 匹配到了（避免重复加入）
+    std::vector<char> det_matched(detections.size(), 0);
+    for (const auto &m : matches) {
+        // 注意：m.first 对应 pending_dets_ 的索引，m.second 对应 detections 的索引
         if (m.first < 0 || m.first >= static_cast<int>(pending_dets_.size())) continue;
-        repeated_old_pending_dets[static_cast<size_t>(m.first)] = true;
+        if (m.second < 0 || m.second >= static_cast<int>(detections.size())) continue;
+
+        det_matched[static_cast<size_t>(m.second)] = 1;
+
+        // 中文注释：当匹配度高时，用“新的检测信息”覆盖旧 pending 的内容，但 age 不变（实现你说的“替换信息但不重置 age”）
+        pending_dets_[static_cast<size_t>(m.first)].box = detections[static_cast<size_t>(m.second)].box;
+        pending_dets_[static_cast<size_t>(m.first)].feature = detections[static_cast<size_t>(m.second)].feature;
     }
-    
-    // 3) 将没有重复的且age <= 2 的旧的 pending_det 加入到 new_pending_dets 中
-    for (size_t d = 0; d < pending_dets_.size(); ++d) {
-        if (!repeated_old_pending_dets[d] && pending_dets_[d].age <= 2) { // 这个最大 age 这里就直接写死了，基本不用改
-            // 保留之前未被视为重复的 pending det
-            new_pending_dets.push_back(pending_dets_[d]);
+
+    new_pending_dets.reserve(pending_dets_.size() + detections.size());
+
+    // 3) 先保留还没过期的旧 pending（其中已匹配的会在上面被更新过内容）
+    for (const auto &p : pending_dets_) {
+        if (p.age <= 2) {
+            new_pending_dets.push_back(p);
         }
     }
-    
-    // 4) 将所有新的 det 加入到 new_pending_dets 中
-    for (auto &d : detections) {
-        // 拷贝新的检测，避免后续修改原始输入导致数据被篡改
-        new_pending_dets.push_back(d);
+
+    // 4) 再加入未匹配到旧 pending 的新检测，作为新的 pending（age 从 0 开始）
+    for (size_t i = 0; i < detections.size(); ++i) {
+        if (det_matched[i]) continue;
+        TrackerInner fresh = detections[i];
+        new_pending_dets.push_back(std::move(fresh));
     }
     
     // 5) 更新 pending_dets_

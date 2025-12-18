@@ -33,12 +33,11 @@ std::vector<std::pair<int, int>> Matcher::match(const std::vector<TrackerInner> 
             // 余弦相似度 [-1,1] 映射到 [0,1]，避免负值导致匹配异常
             cos = 0.5f * (cos + 1.0f);
 
-            // 攻防：使用加权 noisy-or，高分项会显著抬高整体，降低丢框风险
+            // 改为几何加权平均
             const float wi = cfg_.iou_weight / norm_;
             const float wf = cfg_.feature_weight / norm_;
-            const float w = 1.0f
-                - std::pow(std::max(1.0f - iou, 0.0f), wi)
-                * std::pow(std::max(1.0f - cos, 0.0f), wf);
+            // 几何加权平均：当iou或cos接近0时会导致整体分数接近0
+            const float w = std::pow(iou, wi) * std::pow(cos, wf);
             if (w >= cfg_.threshold) {
                 // 将满足阈值条件的匹配分数和索引加入候选列表
                 scores.emplace_back(w, i, j);
