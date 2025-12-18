@@ -8,18 +8,18 @@
 
 #include <opencv2/imgproc.hpp>
 
-Visualizer::Visualizer() : options_() {}
+Visualizer::Visualizer() : cfg_() {}
 
-Visualizer::Visualizer(Options options) : options_(options) {}
+Visualizer::Visualizer(VisualizerConfig cfg) : cfg_(std::move(cfg)) {}
 
-void Visualizer::setOptions(const Options &options)
+void Visualizer::setConfig(const VisualizerConfig &cfg)
 {
-    options_ = options;
+    cfg_ = cfg;
 }
 
-const Visualizer::Options &Visualizer::options() const
+const VisualizerConfig &Visualizer::config() const
 {
-    return options_;
+    return cfg_;
 }
 
 static cv::Scalar hsvToBgr(float h, float s, float v)
@@ -122,9 +122,29 @@ cv::Mat Visualizer::render(const cv::Mat &frame, const LabeledFrame &data) const
         output = frame.clone();
     }
 
-    const int boxThickness = std::max(1, options_.boxThickness);
-    const int textThickness = std::max(1, options_.textThickness);
-    const int pad = std::max(0, options_.textPadding);
+    const int boxThickness = std::max(1, cfg_.box_thickness);
+    const int textThickness = std::max(1, cfg_.text_thickness);
+    const int pad = std::max(0, cfg_.text_padding);
+
+    // 中文注释：绘制 ROI 框（可选），用于直观展示引擎正在分析的子区域
+    if (cfg_.roi.enabled)
+    {
+        const cv::Rect roi = RoiToPixelRect(cfg_.roi, output.size());
+        if (roi.width > 0 && roi.height > 0)
+        {
+            const int roiThickness = std::max(1, cfg_.roi_thickness);
+            cv::rectangle(output, roi, cfg_.roi_color, roiThickness);
+            cv::putText(
+                output,
+                "ROI",
+                cv::Point(roi.x + 5, std::max(15, roi.y + 15)),
+                cfg_.font_face,
+                cfg_.font_scale,
+                cfg_.roi_color,
+                textThickness,
+                cv::LINE_AA);
+        }
+    }
 
     for (const LabeledObject &obj : data.objs)
     {
@@ -137,11 +157,11 @@ cv::Mat Visualizer::render(const cv::Mat &frame, const LabeledFrame &data) const
         cv::rectangle(output, bbox, color, boxThickness);
 
         std::string label = "ID:" + std::to_string(obj.id);
-        if (options_.showClassId)
+        if (cfg_.show_class_id)
         {
             label += " C:" + std::to_string(obj.class_id);
         }
-        if (options_.showScore)
+        if (cfg_.show_score)
         {
             char buf[32];
             std::snprintf(buf, sizeof(buf), " S:%.2f", obj.score);
@@ -149,7 +169,7 @@ cv::Mat Visualizer::render(const cv::Mat &frame, const LabeledFrame &data) const
         }
 
         int baseline = 0;
-        const cv::Size textSize = cv::getTextSize(label, options_.fontFace, options_.fontScale, textThickness, &baseline);
+        const cv::Size textSize = cv::getTextSize(label, cfg_.font_face, cfg_.font_scale, textThickness, &baseline);
 
         cv::Point textOrg(bbox.x, bbox.y - 5);
         if (textOrg.y - textSize.height - baseline - pad * 2 < 0)
@@ -171,9 +191,8 @@ cv::Mat Visualizer::render(const cv::Mat &frame, const LabeledFrame &data) const
         }
 
         const cv::Point textPoint(bg.x + pad, bg.y + bg.height - baseline - pad);
-        cv::putText(output, label, textPoint, options_.fontFace, options_.fontScale, cv::Scalar(255, 255, 255), textThickness, cv::LINE_AA);
+        cv::putText(output, label, textPoint, cfg_.font_face, cfg_.font_scale, cv::Scalar(255, 255, 255), textThickness, cv::LINE_AA);
     }
 
     return output;
 }
-

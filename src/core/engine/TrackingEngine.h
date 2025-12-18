@@ -8,11 +8,13 @@
 
 #include "ILabeledDataIterator.h"
 #include "../capture/IImageIterator.h"
+#include "config/RoiConfig.h"
 
 struct TrackingEngineConfig {
     DetectorConfig detector;
     FeatureExtractorConfig extractor;
     TrackerManagerConfig tracker_mgr;
+    RoiConfig roi;
 };
 
 class TrackingEngine {

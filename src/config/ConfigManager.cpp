@@ -225,12 +225,26 @@ struct Reflect<TrackerManagerConfig> {
 };
 
 template <>
+struct Reflect<RoiConfig> {
+    static constexpr auto fields() {
+        return std::make_tuple(
+            Field<RoiConfig, bool>{"enabled", &RoiConfig::enabled},
+            Field<RoiConfig, float>{"x", &RoiConfig::x},
+            Field<RoiConfig, float>{"y", &RoiConfig::y},
+            Field<RoiConfig, float>{"w", &RoiConfig::w},
+            Field<RoiConfig, float>{"h", &RoiConfig::h}
+        );
+    }
+};
+
+template <>
 struct Reflect<TrackingEngineConfig> {
     static constexpr auto fields() {
         return std::make_tuple(
             Field<TrackingEngineConfig, DetectorConfig>{"detector", &TrackingEngineConfig::detector},
             Field<TrackingEngineConfig, FeatureExtractorConfig>{"extractor", &TrackingEngineConfig::extractor},
-            Field<TrackingEngineConfig, TrackerManagerConfig>{"tracker_mgr", &TrackingEngineConfig::tracker_mgr}
+            Field<TrackingEngineConfig, TrackerManagerConfig>{"tracker_mgr", &TrackingEngineConfig::tracker_mgr},
+            Field<TrackingEngineConfig, RoiConfig>{"roi", &TrackingEngineConfig::roi}
         );
     }
 };
