@@ -21,6 +21,7 @@ struct VisualizerConfig
     RoiConfig roi;
     int roi_thickness = 2;
     cv::Scalar roi_color = cv::Scalar(0, 215, 255); // 金黄色（BGR）
+    float roi_fill_alpha = 0.2f; // ROI 掩膜透明度（0~1）
 };
 
 class Visualizer

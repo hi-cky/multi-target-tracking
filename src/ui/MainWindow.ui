@@ -786,7 +786,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QGroupBox" name="roiGroup">
+               <widget class="QGroupBox" name="roiGroup">
                  <property name="title">
                   <string>ROI</string>
                  </property>
@@ -1119,71 +1119,48 @@
                <item>
                 <widget class="QGroupBox" name="visualizerColorGroup">
                  <property name="title">
-                  <string>ROI 颜色(BGR)</string>
+                  <string>ROI</string>
                  </property>
                  <layout class="QVBoxLayout" name="roiColorLayout">
                   <item>
-                   <layout class="QHBoxLayout" name="roiColorBLayout">
-                    <item>
-                     <widget class="QLabel" name="labelRoiColorB">
-                      <property name="text">
-                       <string>B</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QSpinBox" name="vizRoiColorBSpin">
-                      <property name="minimum">
-                       <number>0</number>
-                      </property>
-                      <property name="maximum">
-                       <number>255</number>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
+                   <widget class="QLabel" name="labelRoiColor">
+                    <property name="text">
+                     <string>颜色选择</string>
+                    </property>
+                   </widget>
                   </item>
                   <item>
-                   <layout class="QHBoxLayout" name="roiColorGLayout">
-                    <item>
-                     <widget class="QLabel" name="labelRoiColorG">
-                      <property name="text">
-                       <string>G</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QSpinBox" name="vizRoiColorGSpin">
-                      <property name="minimum">
-                       <number>0</number>
-                      </property>
-                      <property name="maximum">
-                       <number>255</number>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
+                   <widget class="QPushButton" name="vizRoiColorButton">
+                    <property name="text">
+                     <string>选择颜色</string>
+                    </property>
+                   </widget>
                   </item>
                   <item>
-                   <layout class="QHBoxLayout" name="roiColorRLayout">
-                    <item>
-                     <widget class="QLabel" name="labelRoiColorR">
-                      <property name="text">
-                       <string>R</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QSpinBox" name="vizRoiColorRSpin">
-                      <property name="minimum">
-                       <number>0</number>
-                      </property>
-                      <property name="maximum">
-                       <number>255</number>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
+                   <widget class="QLabel" name="labelRoiAlpha">
+                    <property name="text">
+                     <string>掩膜透明度</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QDoubleSpinBox" name="vizRoiAlphaSpin">
+                    <property name="decimals">
+                     <number>2</number>
+                    </property>
+                    <property name="minimum">
+                     <double>0.000000000000000</double>
+                    </property>
+                    <property name="maximum">
+                     <double>1.000000000000000</double>
+                    </property>
+                    <property name="singleStep">
+                     <double>0.050000000000000</double>
+                    </property>
+                    <property name="value">
+                     <double>0.200000000000000</double>
+                    </property>
+                   </widget>
                   </item>
                  </layout>
                 </widget>

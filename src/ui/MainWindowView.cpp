@@ -1,9 +1,11 @@
 #include "ui/MainWindowView.h"
 
 #include <QAbstractSpinBox>
+#include <QColorDialog>
 #include <QEvent>
 #include <QFileDialog>
 #include <QImage>
+#include <QLatin1Char>
 #include <QPixmap>
 #include <QRegularExpression>
 #include <QStringList>
@@ -50,6 +52,16 @@ MainWindowView::MainWindowView(QWidget *parent)
     connect(ui_->cameraIndexSpin, qOverload<int>(&QSpinBox::valueChanged), this, &MainWindowView::cameraIndexChanged);
     connect(ui_->sampleFpsSpin, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &MainWindowView::sampleFpsChanged);
     connect(ui_->trackingCheck, &QCheckBox::toggled, this, &MainWindowView::trackingToggled);
+
+    // ROI 颜色选择器
+    connect(ui_->vizRoiColorButton, &QPushButton::clicked, this, [this]() {
+        const QColor chosen = QColorDialog::getColor(roi_color_qt_.isValid() ? roi_color_qt_ : QColor(255, 215, 0),
+                                                    this, "选择 ROI 颜色");
+        if (chosen.isValid()) {
+            roi_color_qt_ = chosen;
+            applyRoiColorStyle_();
+        }
+    });
 
     // 禁用数值框滚轮修改（避免误触）
     const auto spinBoxes = findChildren<QAbstractSpinBox *>();
@@ -160,6 +172,26 @@ bool MainWindowView::trackingEnabled() const {
     return ui_->trackingCheck->isChecked();
 }
 
+void MainWindowView::applyRoiColorStyle_() {
+    if (!ui_) return;
+    if (!roi_color_qt_.isValid()) {
+        roi_color_qt_ = QColor(255, 215, 0);
+    }
+    const int r = roi_color_qt_.red();
+    const int g = roi_color_qt_.green();
+    const int b = roi_color_qt_.blue();
+    const int luminance = (r * 299 + g * 587 + b * 114) / 1000;
+    const QString textColor = (luminance < 140) ? "#ffffff" : "#1f2937";
+    ui_->vizRoiColorButton->setText(QString("#%1%2%3")
+                                        .arg(r, 2, 16, QLatin1Char('0'))
+                                        .arg(g, 2, 16, QLatin1Char('0'))
+                                        .arg(b, 2, 16, QLatin1Char('0'))
+                                        .toUpper());
+    ui_->vizRoiColorButton->setStyleSheet(
+        QString("QPushButton { background-color: rgb(%1,%2,%3); color: %4; border: 1px solid #cbd5e1; }")
+            .arg(r).arg(g).arg(b).arg(textColor));
+}
+
 bool MainWindowView::eventFilter(QObject *obj, QEvent *event) {
     if (event && event->type() == QEvent::Wheel) {
         if (qobject_cast<QAbstractSpinBox *>(obj)) {
@@ -222,9 +254,11 @@ void MainWindowView::loadConfig(const AppConfig &cfg) {
     ui_->vizTextPaddingSpin->setValue(cfg.visualizer.text_padding);
     ui_->vizShowScoreCheck->setChecked(cfg.visualizer.show_score);
     ui_->vizShowClassIdCheck->setChecked(cfg.visualizer.show_class_id);
-    ui_->vizRoiColorBSpin->setValue(static_cast<int>(cfg.visualizer.roi_color[0]));
-    ui_->vizRoiColorGSpin->setValue(static_cast<int>(cfg.visualizer.roi_color[1]));
-    ui_->vizRoiColorRSpin->setValue(static_cast<int>(cfg.visualizer.roi_color[2]));
+    ui_->vizRoiAlphaSpin->setValue(cfg.visualizer.roi_fill_alpha);
+    roi_color_qt_ = QColor(static_cast<int>(cfg.visualizer.roi_color[2]),
+                           static_cast<int>(cfg.visualizer.roi_color[1]),
+                           static_cast<int>(cfg.visualizer.roi_color[0]));
+    applyRoiColorStyle_();
 }
 
 AppConfig MainWindowView::collectConfig() const {
@@ -279,10 +313,12 @@ AppConfig MainWindowView::collectConfig() const {
     cfg.visualizer.text_padding = ui_->vizTextPaddingSpin->value();
     cfg.visualizer.show_score = ui_->vizShowScoreCheck->isChecked();
     cfg.visualizer.show_class_id = ui_->vizShowClassIdCheck->isChecked();
+    cfg.visualizer.roi_fill_alpha = static_cast<float>(ui_->vizRoiAlphaSpin->value());
+    const QColor color = roi_color_qt_.isValid() ? roi_color_qt_ : QColor(255, 215, 0);
     cfg.visualizer.roi_color = cv::Scalar(
-        ui_->vizRoiColorBSpin->value(),
-        ui_->vizRoiColorGSpin->value(),
-        ui_->vizRoiColorRSpin->value()
+        color.blue(),
+        color.green(),
+        color.red()
     );
 
     return cfg;

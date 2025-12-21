@@ -311,7 +311,8 @@ struct Reflect<VisualizerConfig> {
             Field<VisualizerConfig, bool>{"show_class_id", &VisualizerConfig::show_class_id},
             Field<VisualizerConfig, RoiConfig>{"roi", &VisualizerConfig::roi},
             Field<VisualizerConfig, int>{"roi_thickness", &VisualizerConfig::roi_thickness},
-            Field<VisualizerConfig, cv::Scalar>{"roi_color", &VisualizerConfig::roi_color}
+            Field<VisualizerConfig, cv::Scalar>{"roi_color", &VisualizerConfig::roi_color},
+            Field<VisualizerConfig, float>{"roi_fill_alpha", &VisualizerConfig::roi_fill_alpha}
         );
     }
 };

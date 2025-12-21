@@ -132,6 +132,14 @@ cv::Mat Visualizer::render(const cv::Mat &frame, const LabeledFrame &data) const
         const cv::Rect roi = RoiToPixelRect(cfg_.roi, output.size());
         if (roi.width > 0 && roi.height > 0)
         {
+            const float alpha = std::clamp(cfg_.roi_fill_alpha, 0.0f, 1.0f);
+            if (alpha > 0.0f)
+            {
+                cv::Mat roiMat = output(roi);
+                cv::Mat colorMat(roi.size(), roiMat.type(), cfg_.roi_color);
+                cv::addWeighted(colorMat, alpha, roiMat, 1.0 - alpha, 0.0, roiMat);
+            }
+
             const int roiThickness = std::max(1, cfg_.roi_thickness);
             cv::rectangle(output, roi, cfg_.roi_color, roiThickness);
             cv::putText(

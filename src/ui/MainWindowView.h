@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QColor>
 #include <QMainWindow>
 #include <vector>
 
@@ -61,6 +62,8 @@ signals:
     void trackingToggled(bool enabled);
 
 private:
+    void applyRoiColorStyle_();
+
     bool eventFilter(QObject *obj, QEvent *event) override;
 
     static QString joinIntList_(const std::vector<int> &ids);
@@ -68,4 +71,5 @@ private:
 
     Ui::MainWindow *ui_ = nullptr;
     AppConfig cached_config_{};
+    QColor roi_color_qt_;
 };
