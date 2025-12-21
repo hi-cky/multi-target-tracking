@@ -6,13 +6,13 @@ import time
 
 
 def _l2_normalize(x: np.ndarray, eps: float = 1e-12) -> np.ndarray:
-    # 中文注释：对向量做 L2 归一化（避免余弦相似度/统计量受到尺度影响）
+    # 对向量做 L2 归一化（避免余弦相似度/统计量受到尺度影响）
     norm = np.linalg.norm(x, axis=-1, keepdims=True)
     return x / np.maximum(norm, eps)
 
 
 def evaluate_embedding_stability(embeddings: np.ndarray) -> None:
-    # 中文注释：给一串 embedding（形状 N×D）输出几个更直观的“稳定性”标量指标
+    # 给一串 embedding（形状 N×D）输出几个更直观的“稳定性”标量指标
     # - 相邻帧余弦相似度：越接近 1 越稳定（可以抓到瞬时跳变）
     # - 到中心向量的余弦相似度：越集中越稳定（整体漂移/抖动）
     # - 方差的汇总：把“每一维方差向量”压缩成几个易读数字
@@ -24,7 +24,7 @@ def evaluate_embedding_stability(embeddings: np.ndarray) -> None:
         print("样本数不足（至少需要 2 个 embedding 才能评估稳定性）")
         return
 
-    # 中文注释：统一做一次归一化，避免某些情况下 predict 没有严格归一化
+    # 统一做一次归一化，避免某些情况下 predict 没有严格归一化
     emb = _l2_normalize(embeddings.astype(np.float32))
 
     # 1) 相邻帧余弦相似度（embedding 已归一化时，点积就是余弦）
@@ -46,7 +46,7 @@ def evaluate_embedding_stability(embeddings: np.ndarray) -> None:
     topk = min(10, d)
     top_idx = np.argsort(-per_dim_std)[:topk]
 
-    # 中文注释：打印摘要（尽量用少量数字把“稳不稳”说明白）
+    # 打印摘要（尽量用少量数字把“稳不稳”说明白）
     print("\n========== Embedding 稳定性评估 ==========")
     print(f"样本数 N={n}, 维度 D={d}")
 
@@ -73,7 +73,7 @@ def evaluate_embedding_stability(embeddings: np.ndarray) -> None:
 
 
 def evaluate_multi_person_discriminability(embeddings_by_frame: list[np.ndarray]) -> None:
-    # 中文注释：评估“同一帧不同人的特征区分度”
+    # 评估“同一帧不同人的特征区分度”
     # 思路：对每帧的多个人 embedding（形状 M×D，且每行已 L2 归一化）计算两两余弦相似度；
     # - 相似度越低，区分度越好
     # - 每帧的“最大相似度”很关键：一旦很高，说明存在两个人特征很像/框错了/同一个人被重复框
@@ -92,7 +92,7 @@ def evaluate_multi_person_discriminability(embeddings_by_frame: list[np.ndarray]
         frames_used += 1
         e = _l2_normalize(emb.astype(np.float32))
 
-        # 中文注释：余弦相似度矩阵 = E @ E^T（对角线是 1）
+        # 余弦相似度矩阵 = E @ E^T（对角线是 1）
         sim = e @ e.T  # (n, n)
         mask = ~np.eye(n, dtype=bool)
         sims = sim[mask]  # (n*n-n,)
@@ -149,25 +149,25 @@ def main():
         input_height=256,
         use_gpu=True
     )
-    # 中文注释：单人稳定性：每帧取第一个有效框收集 embedding（和之前逻辑保持一致）
+    # 单人稳定性：每帧取第一个有效框收集 embedding（和之前逻辑保持一致）
     embedding_list: list[np.ndarray] = []
-    # 中文注释：多人区分度：按帧收集“同帧多框”的 embeddings（每帧一个 (M, D) 数组）
+    # 多人区分度：按帧收集“同帧多框”的 embeddings（每帧一个 (M, D) 数组）
     embeddings_by_frame: list[np.ndarray] = []
-    # 中文注释：为了避免同帧框太多导致 O(M^2) 计算太重，这里限制每帧最多取多少个框
+    # 为了避免同帧框太多导致 O(M^2) 计算太重，这里限制每帧最多取多少个框
     max_people_per_frame = 6
 
     for frame in video_iterator:
         boxes: list[Box] = yolo.predict(frame, show=True)
         if not boxes:
-            # 中文注释：当前帧没有检出目标，跳过
+            # 当前帧没有检出目标，跳过
             continue
 
-        # 中文注释：对同一帧的多个框提特征（用于“多人区分度”）
+        # 对同一帧的多个框提特征（用于“多人区分度”）
         h, w = frame.shape[:2]
         frame_embeddings: list[np.ndarray] = []
         first_embedding: np.ndarray | None = None
         for i, box in enumerate(boxes[:max_people_per_frame]):
-            # 中文注释：裁切出对应 Box 的图片（做一次边界裁剪，避免越界导致空图）
+            # 裁切出对应 Box 的图片（做一次边界裁剪，避免越界导致空图）
             x1 = int(max(0, min(w - 1, box.x)))
             y1 = int(max(0, min(h - 1, box.y)))
             x2 = int(max(0, min(w, box.x + box.w)))
@@ -179,7 +179,7 @@ def main():
             emb = osnet.predict(cropped_image)
             frame_embeddings.append(emb)
 
-            # 中文注释：单人稳定性：取本帧第一个有效框的 embedding
+            # 单人稳定性：取本帧第一个有效框的 embedding
             if first_embedding is None:
                 first_embedding = emb
 
@@ -189,7 +189,7 @@ def main():
         if len(frame_embeddings) >= 2:
             embeddings_by_frame.append(np.array(frame_embeddings, dtype=np.float32))
 
-    # 中文注释：把收集到的 embedding 变成 (N, D) 的数组，并评估稳定性
+    # 把收集到的 embedding 变成 (N, D) 的数组，并评估稳定性
     embedding_array = np.array(embedding_list, dtype=np.float32)
     if embedding_array.size == 0:
         print("没有收集到任何 embedding（可能一直没检测到目标）")

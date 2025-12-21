@@ -1,6 +1,7 @@
 #include "Tracker.h"
 
 #include <algorithm>
+#include <cmath>
 
 Tracker::Tracker(size_t id, const TrackerInner &inner, const TrackerConfig &cfg)
     : id_(id), inner_(inner), cfg_(cfg), life_(cfg.max_life) {
@@ -43,10 +44,13 @@ void Tracker::initKalman(const BBox &box) {
     kf_.processNoiseCov.at<float>(7, 7) = 1e-2f; // vh
 
     kf_.measurementNoiseCov = cv::Mat::eye(4, 4, CV_32F);
-    kf_.measurementNoiseCov.at<float>(0, 0) = 1e-2f; // 位置观测噪声小
-    kf_.measurementNoiseCov.at<float>(1, 1) = 1e-2f;
-    kf_.measurementNoiseCov.at<float>(2, 2) = 1e-1f; // 尺寸观测噪声更大，减小抖动
-    kf_.measurementNoiseCov.at<float>(3, 3) = 1e-1f;
+    // 观测噪声越小越“相信观测”，数值越大越平滑
+    const float pos_noise = std::max(1e-6f, cfg_.kf_pos_noise);
+    const float size_noise = std::max(1e-6f, cfg_.kf_size_noise);
+    kf_.measurementNoiseCov.at<float>(0, 0) = pos_noise;
+    kf_.measurementNoiseCov.at<float>(1, 1) = pos_noise;
+    kf_.measurementNoiseCov.at<float>(2, 2) = size_noise;
+    kf_.measurementNoiseCov.at<float>(3, 3) = size_noise;
 
     setIdentity(kf_.errorCovPost, cv::Scalar::all(1));
 
@@ -80,7 +84,14 @@ BBox Tracker::boxFromState(const cv::Mat &state) const {
     return BBox(cv::Rect2f(x, y, w, h), inner_.box.class_id, inner_.box.score);
 }
 
-void Tracker::predict() {
+void Tracker::predict(float dt) {
+    const float step = (dt > 0.0f) ? dt : 1.0f;
+    // 根据真实时间间隔更新转移矩阵（dt）
+    kf_.transitionMatrix.at<float>(0, 4) = step;
+    kf_.transitionMatrix.at<float>(1, 5) = step;
+    kf_.transitionMatrix.at<float>(2, 6) = step;
+    kf_.transitionMatrix.at<float>(3, 7) = step;
+
     cv::Mat pred = kf_.predict();
     inner_.box = boxFromState(pred);
 }
@@ -119,6 +130,6 @@ bool Tracker::updateAsMissing() {
 
 
 bool Tracker::isHealthy() {
-    return life_ > 0;
-    // return life_ == cfg_.max_life; // 改为如果当前是满血则视为健康
+    const int min_life = std::max(1, static_cast<int>(std::ceil(cfg_.max_life * cfg_.healthy_percent)));
+    return life_ >= min_life;
 }

@@ -11,7 +11,8 @@ struct DetectorConfig {
     int input_height = 640;      // 模型期望的输入高度
     float score_threshold = 0.5F;   // objectness 与类别融合后的阈值
     float nms_threshold = 0.8F;     // 同类别框的 IoM NMS 阈值
-    // 中文注释：检测器关注的类别 ID 列表；为空表示不过滤（接受所有类别）
+    bool filter_edge_boxes = true; // 是否过滤触边框（某边位于或超过画面边界）
+    // 检测器关注的类别 ID 列表；为空表示不过滤（接受所有类别）
     // 说明：我们在推理热路径里会把它预处理成 unordered_set 来做 O(1) 判断，避免逐个遍历。
     std::vector<int> focus_class_ids = {};
 

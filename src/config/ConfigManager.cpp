@@ -12,7 +12,7 @@
 
 #include "config/AppConfig.h"
 
-// 中文注释：轻量级“反射”与读写工具
+// 轻量级“反射”与读写工具
 namespace {
 
 // ---------- 基础读写 ----------
@@ -30,6 +30,13 @@ template <>
 void writeValue<std::vector<int>>(cv::FileStorage &fs, const char *key, const std::vector<int> &vec) {
     fs << key << "[";
     for (int x : vec) fs << x;
+    fs << "]";
+}
+
+template <>
+void writeValue<cv::Scalar>(cv::FileStorage &fs, const char *key, const cv::Scalar &value) {
+    fs << key << "[";
+    fs << value[0] << value[1] << value[2];
     fs << "]";
 }
 
@@ -80,6 +87,23 @@ bool readValue<std::vector<int>>(const cv::FileNode &node, const char *key, std:
     return true;
 }
 
+template <>
+bool readValue<cv::Scalar>(const cv::FileNode &node, const char *key, cv::Scalar &out) {
+    const cv::FileNode v = node[key];
+    if (v.empty() || !v.isSeq()) return false;
+    std::vector<double> vals;
+    for (auto it = v.begin(); it != v.end(); ++it) {
+        double val = 0.0;
+        *it >> val;
+        vals.push_back(val);
+    }
+    if (vals.size() >= 3) {
+        out = cv::Scalar(vals[0], vals[1], vals[2]);
+        return true;
+    }
+    return false;
+}
+
 // ---------- 反射描述 ----------
 template <typename T, typename MemberT>
 struct Field {
@@ -122,6 +146,17 @@ inline void serialize<std::vector<int>>(cv::FileStorage &fs, const char *key, co
 
 template <>
 inline void deserialize<std::vector<int>>(const cv::FileNode &node, const char *key, std::vector<int> &v) {
+    readValue(node, key, v);
+}
+
+// 针对 cv::Scalar 的显式序列化/反序列化，避免走类反射路径
+template <>
+inline void serialize<cv::Scalar>(cv::FileStorage &fs, const char *key, const cv::Scalar &v) {
+    writeValue(fs, key, v);
+}
+
+template <>
+inline void deserialize<cv::Scalar>(const cv::FileNode &node, const char *key, cv::Scalar &v) {
     readValue(node, key, v);
 }
 
@@ -176,6 +211,7 @@ struct Reflect<DetectorConfig> {
             Field<DetectorConfig, int>{"input_height", &DetectorConfig::input_height},
             Field<DetectorConfig, float>{"score_threshold", &DetectorConfig::score_threshold},
             Field<DetectorConfig, float>{"nms_threshold", &DetectorConfig::nms_threshold},
+            Field<DetectorConfig, bool>{"filter_edge_boxes", &DetectorConfig::filter_edge_boxes},
             Field<DetectorConfig, std::vector<int>>{"focus_class_ids", &DetectorConfig::focus_class_ids},
             Field<DetectorConfig, OrtEnvConfig>{"ort_env", &DetectorConfig::ort_env_config}
         );
@@ -209,7 +245,10 @@ struct Reflect<TrackerConfig> {
     static constexpr auto fields() {
         return std::make_tuple(
             Field<TrackerConfig, int>{"max_life", &TrackerConfig::max_life},
-            Field<TrackerConfig, float>{"feature_momentum", &TrackerConfig::feature_momentum}
+            Field<TrackerConfig, float>{"feature_momentum", &TrackerConfig::feature_momentum},
+            Field<TrackerConfig, float>{"healthy_percent", &TrackerConfig::healthy_percent},
+            Field<TrackerConfig, float>{"kf_pos_noise", &TrackerConfig::kf_pos_noise},
+            Field<TrackerConfig, float>{"kf_size_noise", &TrackerConfig::kf_size_noise}
         );
     }
 };
@@ -260,11 +299,30 @@ struct Reflect<RecorderConfig> {
 };
 
 template <>
+struct Reflect<VisualizerConfig> {
+    static constexpr auto fields() {
+        return std::make_tuple(
+            Field<VisualizerConfig, int>{"box_thickness", &VisualizerConfig::box_thickness},
+            Field<VisualizerConfig, int>{"text_thickness", &VisualizerConfig::text_thickness},
+            Field<VisualizerConfig, double>{"font_scale", &VisualizerConfig::font_scale},
+            Field<VisualizerConfig, int>{"font_face", &VisualizerConfig::font_face},
+            Field<VisualizerConfig, int>{"text_padding", &VisualizerConfig::text_padding},
+            Field<VisualizerConfig, bool>{"show_score", &VisualizerConfig::show_score},
+            Field<VisualizerConfig, bool>{"show_class_id", &VisualizerConfig::show_class_id},
+            Field<VisualizerConfig, RoiConfig>{"roi", &VisualizerConfig::roi},
+            Field<VisualizerConfig, int>{"roi_thickness", &VisualizerConfig::roi_thickness},
+            Field<VisualizerConfig, cv::Scalar>{"roi_color", &VisualizerConfig::roi_color}
+        );
+    }
+};
+
+template <>
 struct Reflect<AppConfig> {
     static constexpr auto fields() {
         return std::make_tuple(
             Field<AppConfig, TrackingEngineConfig>{"engine", &AppConfig::engine},
-            Field<AppConfig, RecorderConfig>{"recorder", &AppConfig::recorder}
+            Field<AppConfig, RecorderConfig>{"recorder", &AppConfig::recorder},
+            Field<AppConfig, VisualizerConfig>{"visualizer", &AppConfig::visualizer}
         );
     }
 };
@@ -297,6 +355,7 @@ AppConfig ConfigManager::load() const {
 
         deserialize(root, "engine", cfg.engine);
         deserialize(root, "recorder", cfg.recorder);
+        deserialize(root, "visualizer", cfg.visualizer);
     }
     return cfg;
 }
@@ -314,4 +373,5 @@ void ConfigManager::save(const AppConfig &cfg) const {
 
     serialize(fs, "engine", cfg.engine);
     serialize(fs, "recorder", cfg.recorder);
+    serialize(fs, "visualizer", cfg.visualizer);
 }

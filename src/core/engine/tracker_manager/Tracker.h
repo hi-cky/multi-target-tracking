@@ -13,6 +13,9 @@ struct TrackerInner {
 struct TrackerConfig {
     int max_life = 90;          // life 上限
     float feature_momentum = 0.7f; // 新特征的占比（EMA）
+    float healthy_percent = 0.8f;  // 视为健康的血量比例（0~1）
+    float kf_pos_noise = 1e-2f;    // 位置观测噪声（越小越灵敏）
+    float kf_size_noise = 1e-1f;   // 尺寸观测噪声（越小越灵敏）
 };
 
 class Tracker {
@@ -20,7 +23,7 @@ public:
     Tracker(size_t id, const TrackerInner &inner, const TrackerConfig &cfg);
 
     // 卡尔曼预测，更新内部 bbox 但不改变 life
-    void predict();
+    void predict(float dt = 1.0f);
     // 命中更新，返回是否仍存活（恒为 true，便于链式调用）
     bool updateAsHitting(const TrackerInner &detection);
     // 未命中更新，life 减少；若归零返回 true 表示应清除

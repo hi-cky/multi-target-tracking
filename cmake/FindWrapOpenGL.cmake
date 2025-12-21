@@ -1,7 +1,7 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-# 过程级别中文注释：该文件复制自 Qt 6.9.0，移除了 macOS Tahoe 不再存在的 AGL.framework 依赖，避免链接失败
+# 该文件复制自 Qt 6.9.0，移除了 macOS Tahoe 不再存在的 AGL.framework 依赖，避免链接失败
 message(STATUS "WrapOpenGL finder from project/cmake/FindWrapOpenGL.cmake 已启用")
 
 if(TARGET WrapOpenGL::WrapOpenGL)
@@ -28,7 +28,7 @@ if (OpenGL_FOUND)
         endif()
 
         target_link_libraries(WrapOpenGL::WrapOpenGL INTERFACE ${__opengl_fw_path})
-        # 过程级别中文注释：直接跳过 AGL.framework，避免在 macOS 14+ 链接阶段报错
+        # 直接跳过 AGL.framework，避免在 macOS 14+ 链接阶段报错
         message(STATUS "WrapOpenGL: macOS 上跳过 AGL.framework 链接以兼容 Tahoe 及更新系统")
     else()
         target_link_libraries(WrapOpenGL::WrapOpenGL INTERFACE OpenGL::GL)

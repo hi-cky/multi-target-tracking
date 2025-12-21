@@ -6,9 +6,9 @@ TrackerManager::TrackerManager(const TrackerManagerConfig &cfg) :
     cfg_(cfg), 
     matcher_(std::make_unique<Matcher>(cfg.matcher_cfg)) {}
 
-void TrackerManager::predictAll() {
+void TrackerManager::predictAll(float dt) {
     for (auto &t : trackers_) {
-        t->predict();
+        t->predict(dt);
     }
 }
 
@@ -54,7 +54,7 @@ TrackerManager::update(const std::vector<TrackerInner> &detections) {
         // 然后将其标记为本轮已匹配
         det_used[di] = 1;
         // 同时将其标记为丢弃，避免下一轮再次被匹配到
-        // 中文注释：这里用一个很大的 age 作为“已消费”标记，下一轮会在 addNewDetections 里被过滤掉
+        // 这里用一个很大的 age 作为“已消费”标记，下一轮会在 addNewDetections 里被过滤掉
         pending_dets_[di].age = 1000000000;
     }
 
@@ -115,7 +115,7 @@ void TrackerManager::addNewDetections(const std::vector<TrackerInner> &detection
 
         det_matched[static_cast<size_t>(m.second)] = 1;
 
-        // 中文注释：当匹配度高时，用“新的检测信息”覆盖旧 pending 的内容，但 age 不变（实现你说的“替换信息但不重置 age”）
+        // 当匹配度高时，用“新的检测信息”覆盖旧 pending 的内容，但 age 不变（实现你说的“替换信息但不重置 age”）
         pending_dets_[static_cast<size_t>(m.first)].box = detections[static_cast<size_t>(m.second)].box;
         pending_dets_[static_cast<size_t>(m.first)].feature = detections[static_cast<size_t>(m.second)].feature;
     }

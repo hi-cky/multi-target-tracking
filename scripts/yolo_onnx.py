@@ -31,7 +31,7 @@ class YoloOnnx:
         self.nms_iou_thr = nms_iou_thr
         self.use_gpu = use_gpu
 
-        # 中文注释：根据 use_gpu 选择推理后端；若要求 GPU 但环境没有 CUDA，则直接报错
+        # 根据 use_gpu 选择推理后端；若要求 GPU 但环境没有 CUDA，则直接报错
         if self.use_gpu:
             available_providers = ort.get_available_providers()
             if "CUDAExecutionProvider" not in available_providers:
@@ -40,7 +40,7 @@ class YoloOnnx:
                     "请确认安装 onnxruntime-gpu 且机器具备可用的 NVIDIA CUDA 显卡。"
                 )
 
-            # 中文注释：默认使用 CUDA 的第 1 张卡（device_id=0）
+            # 默认使用 CUDA 的第 1 张卡（device_id=0）
             try:
                 self.ort_sess = ort.InferenceSession(
                     model_path,
@@ -52,7 +52,7 @@ class YoloOnnx:
                     "请确认机器存在可用 CUDA 卡、驱动/CUDA 环境正常，且 device_id=0 可用。"
                 ) from e
         else:
-            # 中文注释：默认使用 CPU 推理
+            # 默认使用 CPU 推理
             self.ort_sess = ort.InferenceSession(model_path)
         self.input_weight = input_width
         self.input_height = input_height
@@ -65,12 +65,12 @@ class YoloOnnx:
         window_name: str = "YOLO-ONNX",
         wait: int = 1,
     ) -> list[Box]:
-        # 中文注释：预处理图像
+        # 预处理图像
         preprocessed_image = self.preprocess(image)
 
         outputs = self.ort_sess.run(["output0"], {'images': preprocessed_image})
 
-        # 中文注释：输出检查（预期 outputs 是长度为 1 的 list）
+        # 输出检查（预期 outputs 是长度为 1 的 list）
         if (not isinstance(outputs, list)) or (len(outputs) != 1):
             raise ValueError("Unexpected output type")
 
@@ -82,7 +82,7 @@ class YoloOnnx:
         # Postprocess outputs
         predict_boxes = self.nms(output[0].transpose((1, 0)))
 
-        # 中文注释：如需可视化，则把检测框映射回原图坐标后画出来
+        # 如需可视化，则把检测框映射回原图坐标后画出来
         if show:
             vis_boxes = self._map_boxes_to_original(image, predict_boxes)
             self.visualize(image, vis_boxes, window_name=window_name, wait=wait)
@@ -151,7 +151,7 @@ class YoloOnnx:
         return selected_boxes
 
     def _map_boxes_to_original(self, image: NDArray, boxes: list[Box]) -> list[Box]:
-        # 中文注释：把 letterbox 输入空间的框，映射回原图空间（用于可视化）
+        # 把 letterbox 输入空间的框，映射回原图空间（用于可视化）
         img_h, img_w = image.shape[:2]
         ratio = min(self.input_height / img_h, self.input_weight / img_w)
         new_width = int(img_w * ratio)
@@ -161,13 +161,13 @@ class YoloOnnx:
 
         mapped: list[Box] = []
         for b in boxes:
-            # 中文注释：这里沿用当前工程的 Box 语义（x,y,w,h 视为左上角+宽高）
+            # 这里沿用当前工程的 Box 语义（x,y,w,h 视为左上角+宽高）
             x = (b.x - x_offset) / ratio
             y = (b.y - y_offset) / ratio
             w = b.w / ratio
             h = b.h / ratio
 
-            # 中文注释：裁剪到图像范围内，避免画框越界
+            # 裁剪到图像范围内，避免画框越界
             x = float(np.clip(x, 0, max(0, img_w - 1)))
             y = float(np.clip(y, 0, max(0, img_h - 1)))
             w = float(np.clip(w, 0, img_w - x))
@@ -184,7 +184,7 @@ class YoloOnnx:
         window_name: str = "YOLO-ONNX",
         wait: int = 1,
     ) -> NDArray:
-        # 中文注释：使用 OpenCV 在当前帧上绘制检测框并展示（返回绘制后的图像）
+        # 使用 OpenCV 在当前帧上绘制检测框并展示（返回绘制后的图像）
         vis = image.copy()
         for b in boxes:
             x1, y1 = int(round(b.x)), int(round(b.y))

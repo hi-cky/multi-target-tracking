@@ -126,7 +126,7 @@ cv::Mat Visualizer::render(const cv::Mat &frame, const LabeledFrame &data) const
     const int textThickness = std::max(1, cfg_.text_thickness);
     const int pad = std::max(0, cfg_.text_padding);
 
-    // 中文注释：绘制 ROI 框（可选），用于直观展示引擎正在分析的子区域
+    // 绘制 ROI 框（可选），用于直观展示引擎正在分析的子区域
     if (cfg_.roi.enabled)
     {
         const cv::Rect roi = RoiToPixelRect(cfg_.roi, output.size());

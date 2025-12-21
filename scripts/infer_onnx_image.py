@@ -19,14 +19,14 @@ INPUT_SIZE = 640  # 可根据模型输入修改，若为 None 则不缩放
 
 def load_image(path: Path, target_size: int | None) -> np.ndarray:
     """读取并预处理图片，返回 NCHW float32 张量。"""
-    # 中文注释：读取 BGR 图片并转换为 RGB
+    # 读取 BGR 图片并转换为 RGB
     img = cv2.imread(str(path))
     if img is None:
         raise FileNotFoundError(f"无法读取图片: {path}")
 
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-    # 中文注释：可选 resize+letterbox 到正方形，符合 YOLO 预处理习惯
+    # 可选 resize+letterbox 到正方形，符合 YOLO 预处理习惯
     if target_size:
         h, w = img.shape[:2]
         scale = min(target_size / h, target_size / w)
@@ -38,7 +38,7 @@ def load_image(path: Path, target_size: int | None) -> np.ndarray:
         canvas[top : top + nh, left : left + nw] = resized
         img = canvas
 
-    # 中文注释：归一化并转为 NCHW
+    # 归一化并转为 NCHW
     tensor = img.astype(np.float32) / 255.0
     tensor = np.transpose(tensor, (2, 0, 1))  # CHW
     tensor = np.expand_dims(tensor, 0)  # NCHW
@@ -55,7 +55,7 @@ def main():
     if not image_path.exists():
         sys.exit(f"图片不存在: {image_path}")
 
-    # 中文注释：最简方式加载 ONNX 模型并创建推理会话
+    # 最简方式加载 ONNX 模型并创建推理会话
     session = ort.InferenceSession(str(model_path))
 
     print("\n== ONNX 模型信息 ==")

@@ -2,7 +2,7 @@
 
 #include <string>
 
-// 中文注释：录制/统计模块配置
+// 录制/统计模块配置
 struct RecorderConfig {
     // 统计 CSV 输出路径；为空表示不记录
     std::string stats_csv_path = {};

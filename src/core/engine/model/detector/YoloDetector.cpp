@@ -233,7 +233,7 @@ YoloDetector::runInference(const PreprocessResult &prep,
     candidates.reserve(num_boxes);
 
     for (size_t i = 0; i < num_boxes; ++i) {
-        // 中文注释：部分导出的 YOLO（如 yolo11/12）输出形状为 [batch, 84, 8400]，仅包含 4+80 项（无 obj）。
+        // 部分导出的 YOLO（如 yolo11/12）输出形状为 [batch, 84, 8400]，仅包含 4+80 项（无 obj）。
         // 如果 attr_count==4+num_classes，则认为没有 objectness，直接将其视为 1；否则按常规位置读取。
         const bool no_objectness = (attr_count == 84);  // 典型 coco 80 类：4+80
         const size_t class_start = no_objectness ? 4 : 5;
@@ -257,7 +257,7 @@ YoloDetector::runInference(const PreprocessResult &prep,
             continue;  // 太小的框不要
         }
 
-        // 中文注释：按关注类别过滤（若 focus_class_id_set_ 为空，则表示不过滤）
+        // 按关注类别过滤（若 focus_class_id_set_ 为空，则表示不过滤）
         if (!focus_class_id_set_.empty() &&
             focus_class_id_set_.find(best_class) == focus_class_id_set_.end()) {
             continue;
@@ -280,6 +280,15 @@ YoloDetector::runInference(const PreprocessResult &prep,
         y0 = std::clamp(y0, 0.0F, static_cast<float>(original_size.height));
         x1 = std::clamp(x1, 0.0F, static_cast<float>(original_size.width));
         y1 = std::clamp(y1, 0.0F, static_cast<float>(original_size.height));
+
+        // 可选过滤触边框（某边位于或超过画面边界）
+        if (config_.filter_edge_boxes) {
+            if (x0 <= 0.0F || y0 <= 0.0F ||
+                x1 >= static_cast<float>(original_size.width) ||
+                y1 >= static_cast<float>(original_size.height)) {
+                continue;
+            }
+        }
 
         if (x1 <= x0 || y1 <= y0) {
             continue;  // 非法框

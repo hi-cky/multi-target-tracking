@@ -12,25 +12,25 @@ def parse_args() -> argparse.Namespace:
         "--weights",
         type=Path,
         default=Path("model/yolov8n.pt"),
-        help="过程级别中文注释：指定待转换的 .pt 权重路径",
+        help="指定待转换的 .pt 权重路径",
     )
     parser.add_argument(
         "--output",
         type=Path,
         default=Path("model/yolov8n.onnx"),
-        help="过程级别中文注释：指定导出的 ONNX 保存位置",
+        help="指定导出的 ONNX 保存位置",
     )
     parser.add_argument(
         "--imgsz",
         type=int,
         default=640,
-        help="过程级别中文注释：推理输入尺寸，需与 C++ 推理保持一致",
+        help="推理输入尺寸，需与 C++ 推理保持一致",
     )
     parser.add_argument(
         "--opset",
         type=int,
         default=12,
-        help="过程级别中文注释：ONNX opset 版本，需兼容 onnxruntime",
+        help="ONNX opset 版本，需兼容 onnxruntime",
     )
     return parser.parse_args()
 
@@ -44,10 +44,10 @@ def main() -> None:
     if not weights_path.exists():
         raise FileNotFoundError(f"未找到权重文件: {weights_path}")
 
-    # 过程级别中文注释：加载 YOLOv12n PyTorch 权重
+    # 加载 YOLOv12n PyTorch 权重
     model = YOLO(str(weights_path))
 
-    # 过程级别中文注释：通过官方 export API 直接生成 ONNX
+    # 通过官方 export API 直接生成 ONNX
     exported_path = model.export(
         format="onnx",
         imgsz=args.imgsz,

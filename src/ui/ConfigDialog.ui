@@ -11,7 +11,6 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <!-- Engine 页：递归展示 detector / extractor / tracker_mgr(matcher+tracker) -->
      <widget class="QWidget" name="engineTab">
       <attribute name="title">
        <string>Engine</string>
@@ -24,313 +23,334 @@
          </property>
          <widget class="QWidget" name="engineScrollWidget">
           <layout class="QVBoxLayout" name="engineLayout">
-           <!-- Detector -->
            <item>
             <widget class="QGroupBox" name="detectorGroup">
              <property name="title">
               <string>Detector</string>
              </property>
-             <layout class="QFormLayout" name="detectorForm">
-              <item row="0" column="0">
-               <widget class="QLabel" name="labelDetectorModel">
-                <property name="text">
-                 <string>模型路径</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <layout class="QHBoxLayout" name="detectorModelPathLayout">
-                <item>
-                 <widget class="QLineEdit" name="detectorModelPathEdit"/>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="detectorModelBrowseButton">
+             <layout class="QVBoxLayout" name="detectorGroupLayout">
+              <item>
+               <layout class="QFormLayout" name="detectorForm">
+                <item row="0" column="0">
+                 <widget class="QLabel" name="labelDetectorInput">
                   <property name="text">
-                   <string>浏览</string>
+                   <string>输入尺寸</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <layout class="QHBoxLayout" name="detectorInputLayout">
+                  <item>
+                   <widget class="QSpinBox" name="detectorInputWidthSpin">
+                    <property name="minimum">
+                     <number>32</number>
+                    </property>
+                    <property name="maximum">
+                     <number>4096</number>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="labelDetectorX">
+                    <property name="text">
+                     <string>x</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QSpinBox" name="detectorInputHeightSpin">
+                    <property name="minimum">
+                     <number>32</number>
+                    </property>
+                    <property name="maximum">
+                     <number>4096</number>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QLabel" name="labelDetectorThr">
+                  <property name="text">
+                   <string>阈值</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <layout class="QHBoxLayout" name="detectorThrLayout">
+                  <item>
+                   <widget class="QDoubleSpinBox" name="detectorScoreThrSpin">
+                    <property name="decimals">
+                     <number>3</number>
+                    </property>
+                    <property name="maximum">
+                     <double>1.000000000000000</double>
+                    </property>
+                    <property name="singleStep">
+                     <double>0.010000000000000</double>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="labelDetectorNms">
+                    <property name="text">
+                     <string>NMS</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QDoubleSpinBox" name="detectorNmsThrSpin">
+                    <property name="decimals">
+                     <number>3</number>
+                    </property>
+                    <property name="maximum">
+                     <double>1.000000000000000</double>
+                    </property>
+                    <property name="singleStep">
+                     <double>0.010000000000000</double>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QLabel" name="labelDetectorFocus">
+                  <property name="text">
+                   <string>关注类别IDs</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QLineEdit" name="detectorFocusIdsEdit">
+                  <property name="placeholderText">
+                   <string>例如：0, 1, 2（留空=不过滤）</string>
                   </property>
                  </widget>
                 </item>
                </layout>
               </item>
-              <item row="1" column="0">
-               <widget class="QLabel" name="labelDetectorInput">
-                <property name="text">
-                 <string>输入尺寸</string>
+              <item>
+               <widget class="QGroupBox" name="detectorOrtEnvGroup">
+                <property name="title">
+                 <string>OrtEnv</string>
                 </property>
+                <layout class="QFormLayout" name="detectorOrtEnvForm">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="labelDetectorModel">
+                   <property name="text">
+                    <string>模型路径</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <layout class="QHBoxLayout" name="detectorModelPathLayout">
+                   <item>
+                    <widget class="QLineEdit" name="detectorModelPathEdit"/>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="detectorModelBrowseButton">
+                     <property name="text">
+                      <string>浏览</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="labelDetectorGpu">
+                   <property name="text">
+                    <string>GPU</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <layout class="QHBoxLayout" name="detectorGpuLayout">
+                   <item>
+                    <widget class="QCheckBox" name="detectorUseGpuCheck">
+                     <property name="text">
+                      <string>使用GPU</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="labelDeviceId">
+                     <property name="text">
+                      <string>device_id</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QSpinBox" name="detectorDeviceIdSpin">
+                     <property name="minimum">
+                      <number>0</number>
+                     </property>
+                     <property name="maximum">
+                      <number>32</number>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="labelGpuMem">
+                     <property name="text">
+                      <string>显存上限(MB)</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QDoubleSpinBox" name="detectorGpuMemSpin">
+                     <property name="decimals">
+                      <number>0</number>
+                     </property>
+                     <property name="maximum">
+                      <double>65536.000000000000000</double>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                </layout>
                </widget>
-              </item>
-              <item row="1" column="1">
-               <layout class="QHBoxLayout" name="detectorInputLayout">
-                <item>
-                 <widget class="QSpinBox" name="detectorInputWidthSpin">
-                  <property name="minimum">
-                   <number>32</number>
-                  </property>
-                  <property name="maximum">
-                   <number>4096</number>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="labelX">
-                  <property name="text">
-                   <string>x</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QSpinBox" name="detectorInputHeightSpin">
-                  <property name="minimum">
-                   <number>32</number>
-                  </property>
-                  <property name="maximum">
-                   <number>4096</number>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item row="2" column="0">
-               <widget class="QLabel" name="labelDetectorThr">
-                <property name="text">
-                 <string>阈值</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="1">
-               <layout class="QHBoxLayout" name="detectorThrLayout">
-                <item>
-                 <widget class="QDoubleSpinBox" name="detectorScoreThrSpin">
-                  <property name="decimals">
-                   <number>3</number>
-                  </property>
-                  <property name="maximum">
-                   <double>1.000000000000000</double>
-                  </property>
-                  <property name="singleStep">
-                   <double>0.010000000000000</double>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="labelDetectorNms">
-                  <property name="text">
-                   <string>NMS</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QDoubleSpinBox" name="detectorNmsThrSpin">
-                  <property name="decimals">
-                   <number>3</number>
-                  </property>
-                  <property name="maximum">
-                   <double>1.000000000000000</double>
-                  </property>
-                  <property name="singleStep">
-                   <double>0.010000000000000</double>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item row="3" column="0">
-               <widget class="QLabel" name="labelDetectorFocus">
-                <property name="text">
-                 <string>关注类别IDs</string>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="1">
-               <widget class="QLineEdit" name="detectorFocusIdsEdit">
-                <property name="placeholderText">
-                 <string>例如：0, 1, 2（留空=不过滤）</string>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="0">
-               <widget class="QLabel" name="labelDetectorGpu">
-                <property name="text">
-                 <string>GPU</string>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="1">
-               <layout class="QHBoxLayout" name="detectorGpuLayout">
-                <item>
-                 <widget class="QCheckBox" name="detectorUseGpuCheck">
-                  <property name="text">
-                   <string>使用GPU</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="labelDeviceId">
-                  <property name="text">
-                   <string>device_id</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QSpinBox" name="detectorDeviceIdSpin">
-                  <property name="minimum">
-                   <number>0</number>
-                  </property>
-                  <property name="maximum">
-                   <number>32</number>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="labelGpuMem">
-                  <property name="text">
-                   <string>显存上限(MB)</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QDoubleSpinBox" name="detectorGpuMemSpin">
-                  <property name="decimals">
-                   <number>0</number>
-                  </property>
-                  <property name="maximum">
-                   <double>65536.000000000000000</double>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
               </item>
              </layout>
             </widget>
            </item>
-
-           <!-- Extractor -->
            <item>
             <widget class="QGroupBox" name="featureGroup">
              <property name="title">
-              <string>Feature Extractor</string>
+              <string>Extractor</string>
              </property>
-             <layout class="QFormLayout" name="featureForm">
-              <item row="0" column="0">
-               <widget class="QLabel" name="labelFeatureModel">
-                <property name="text">
-                 <string>模型路径</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <layout class="QHBoxLayout" name="featureModelLayout">
-                <item>
-                 <widget class="QLineEdit" name="featureModelPathEdit"/>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="featureModelBrowseButton">
+             <layout class="QVBoxLayout" name="featureGroupLayout">
+              <item>
+               <layout class="QFormLayout" name="featureForm">
+                <item row="0" column="0">
+                 <widget class="QLabel" name="labelFeatureInput">
                   <property name="text">
-                   <string>浏览</string>
+                   <string>输入尺寸</string>
                   </property>
                  </widget>
+                </item>
+                <item row="0" column="1">
+                 <layout class="QHBoxLayout" name="featureInputLayout">
+                  <item>
+                   <widget class="QSpinBox" name="featureInputWidthSpin">
+                    <property name="minimum">
+                     <number>32</number>
+                    </property>
+                    <property name="maximum">
+                     <number>4096</number>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="labelFeatureX">
+                    <property name="text">
+                     <string>x</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QSpinBox" name="featureInputHeightSpin">
+                    <property name="minimum">
+                     <number>32</number>
+                    </property>
+                    <property name="maximum">
+                     <number>4096</number>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
                 </item>
                </layout>
               </item>
-              <item row="1" column="0">
-               <widget class="QLabel" name="labelFeatureInput">
-                <property name="text">
-                 <string>输入尺寸</string>
+              <item>
+               <widget class="QGroupBox" name="featureOrtEnvGroup">
+                <property name="title">
+                 <string>OrtEnv</string>
                 </property>
+                <layout class="QFormLayout" name="featureOrtEnvForm">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="labelFeatureModel">
+                   <property name="text">
+                    <string>模型路径</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <layout class="QHBoxLayout" name="featureModelLayout">
+                   <item>
+                    <widget class="QLineEdit" name="featureModelPathEdit"/>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="featureModelBrowseButton">
+                     <property name="text">
+                      <string>浏览</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="labelFeatureGpu">
+                   <property name="text">
+                    <string>GPU</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <layout class="QHBoxLayout" name="featureGpuLayout">
+                   <item>
+                    <widget class="QCheckBox" name="featureUseGpuCheck">
+                     <property name="text">
+                      <string>使用GPU</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="labelFeatureDevice">
+                     <property name="text">
+                      <string>device_id</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QSpinBox" name="featureDeviceIdSpin">
+                     <property name="minimum">
+                      <number>0</number>
+                     </property>
+                     <property name="maximum">
+                      <number>32</number>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="labelFeatureMem">
+                     <property name="text">
+                      <string>显存上限(MB)</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QDoubleSpinBox" name="featureGpuMemSpin">
+                     <property name="decimals">
+                      <number>0</number>
+                     </property>
+                     <property name="maximum">
+                      <double>65536.000000000000000</double>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                </layout>
                </widget>
-              </item>
-              <item row="1" column="1">
-               <layout class="QHBoxLayout" name="featureInputLayout">
-                <item>
-                 <widget class="QSpinBox" name="featureInputWidthSpin">
-                  <property name="minimum">
-                   <number>32</number>
-                  </property>
-                  <property name="maximum">
-                   <number>4096</number>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="labelFeatureX">
-                  <property name="text">
-                   <string>x</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QSpinBox" name="featureInputHeightSpin">
-                  <property name="minimum">
-                   <number>32</number>
-                  </property>
-                  <property name="maximum">
-                   <number>4096</number>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item row="2" column="0">
-               <widget class="QLabel" name="labelFeatureGpu">
-                <property name="text">
-                 <string>GPU</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="1">
-               <layout class="QHBoxLayout" name="featureGpuLayout">
-                <item>
-                 <widget class="QCheckBox" name="featureUseGpuCheck">
-                  <property name="text">
-                   <string>使用GPU</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="labelFeatureDevice">
-                  <property name="text">
-                   <string>device_id</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QSpinBox" name="featureDeviceIdSpin">
-                  <property name="minimum">
-                   <number>0</number>
-                  </property>
-                  <property name="maximum">
-                   <number>32</number>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="labelFeatureMem">
-                  <property name="text">
-                   <string>显存上限(MB)</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QDoubleSpinBox" name="featureGpuMemSpin">
-                  <property name="decimals">
-                   <number>0</number>
-                  </property>
-                  <property name="maximum">
-                   <double>65536.000000000000000</double>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
               </item>
              </layout>
             </widget>
            </item>
-
-           <!-- Tracker Manager -->
            <item>
             <widget class="QGroupBox" name="trackerMgrGroup">
              <property name="title">
-              <string>Tracker Manager</string>
+              <string>TrackerManager</string>
              </property>
              <layout class="QVBoxLayout" name="trackerMgrLayout">
               <item>
@@ -466,7 +486,109 @@
              </layout>
             </widget>
            </item>
-
+           <item>
+            <widget class="QGroupBox" name="roiGroup">
+             <property name="title">
+              <string>ROI</string>
+             </property>
+             <layout class="QFormLayout" name="roiForm">
+              <item row="0" column="0">
+               <widget class="QLabel" name="labelRoiEnable">
+                <property name="text">
+                 <string>启用</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QCheckBox" name="roiEnableCheck">
+                <property name="text">
+                 <string>启用 ROI（归一化坐标）</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="labelRoiXY">
+                <property name="text">
+                 <string>x, y</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <layout class="QHBoxLayout" name="roiXYLayout">
+                <item>
+                 <widget class="QDoubleSpinBox" name="roiXSpin">
+                  <property name="decimals">
+                   <number>3</number>
+                  </property>
+                  <property name="maximum">
+                   <double>1.000000000000000</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.010000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QDoubleSpinBox" name="roiYSpin">
+                  <property name="decimals">
+                   <number>3</number>
+                  </property>
+                  <property name="maximum">
+                   <double>1.000000000000000</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.010000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="labelRoiWH">
+                <property name="text">
+                 <string>w, h</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <layout class="QHBoxLayout" name="roiWHLayout">
+                <item>
+                 <widget class="QDoubleSpinBox" name="roiWSpin">
+                  <property name="decimals">
+                   <number>3</number>
+                  </property>
+                  <property name="maximum">
+                   <double>1.000000000000000</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.010000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>1.000000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QDoubleSpinBox" name="roiHSpin">
+                  <property name="decimals">
+                   <number>3</number>
+                  </property>
+                  <property name="maximum">
+                   <double>1.000000000000000</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.010000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>1.000000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
            <item>
             <spacer name="engineSpacer">
              <property name="orientation">
@@ -486,8 +608,6 @@
        </item>
       </layout>
      </widget>
-
-     <!-- Recorder 页 -->
      <widget class="QWidget" name="recorderTab">
       <attribute name="title">
        <string>Recorder</string>

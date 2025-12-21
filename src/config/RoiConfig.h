@@ -5,7 +5,7 @@
 
 #include <opencv2/core.hpp>
 
-// 中文注释：ROI 配置（归一化坐标系，取值范围 0~1）
+// ROI 配置（归一化坐标系，取值范围 0~1）
 // - (x,y) 表示 ROI 左上角占原图的百分比位置
 // - (w,h) 表示 ROI 宽高占原图的百分比
 // - enabled=false 表示使用整帧
@@ -17,7 +17,7 @@ struct RoiConfig {
     float h = 1.0F;
 };
 
-// 中文注释：将归一化 ROI 转为像素 Rect，并做边界裁剪；若 ROI 非法则返回空 Rect
+// 将归一化 ROI 转为像素 Rect，并做边界裁剪；若 ROI 非法则返回空 Rect
 inline cv::Rect RoiToPixelRect(const RoiConfig &roi, const cv::Size &frame_size) {
     if (!roi.enabled) return cv::Rect();
     if (frame_size.width <= 0 || frame_size.height <= 0) return cv::Rect();

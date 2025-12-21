@@ -10,7 +10,7 @@
 #include "tracker_manager/TrackerManager.h"
 
 namespace {
-// 中文注释：判断 bbox（像素坐标）中心点是否在 ROI 内
+// 判断 bbox（像素坐标）中心点是否在 ROI 内
 bool centerInRoi(const cv::Rect &bbox, const cv::Rect &roi) {
     if (roi.width <= 0 || roi.height <= 0) return true;
     const float cx = static_cast<float>(bbox.x) + static_cast<float>(bbox.width) * 0.5F;
@@ -33,7 +33,17 @@ public:
        detector_(std::move(detector)),
        extractor_(std::move(extractor)),
        tracker_mgr_(std::move(tracker_mgr)),
-       cfg_(std::move(cfg)) {}
+       cfg_(std::move(cfg)) {
+        const FrameSourceInfo info = image_iter_ ? image_iter_->info() : FrameSourceInfo{};
+        if (info.sample_fps > 0.0) {
+            dt_ = 1.0 / info.sample_fps;
+        } else if (info.source_fps > 0.0) {
+            const int step = info.frame_step > 0 ? info.frame_step : 1;
+            dt_ = static_cast<double>(step) / info.source_fps;
+        } else {
+            dt_ = 1.0;
+        }
+    }
 
     bool hasNext() const override { return image_iter_ && image_iter_->hasNext(); }
 
@@ -41,18 +51,18 @@ public:
         if (!image_iter_ || !image_iter_->hasNext()) return false;
         if (!image_iter_->next(frame_)) return false;
 
-        // 中文注释：根据当前帧尺寸换算 ROI（固定一次选择，但像素值依赖视频分辨率）
+        // 根据当前帧尺寸换算 ROI（固定一次选择，但像素值依赖视频分辨率）
         const cv::Rect roi_px = RoiToPixelRect(cfg_.roi, frame_.size());
         
         // ===卡尔曼滤波根据上一帧的状态对这一帧的结果进行预测===
         // 1) 预测所有轨迹
-        tracker_mgr_->predictAll();
+        tracker_mgr_->predictAll(static_cast<float>(dt_));
         
         // 2) 输出所有traker对于当前这一帧的预测结果（统一由 TrackerManager 负责组装，避免各处重复实现）
         // update 返回值可用于调试/扩展；当前输出直接从 tracker_mgr_ 导出
         tracker_mgr_->fillLabeledFrame(frame_index_, label);
 
-        // 中文注释：ROI 模式下，只输出 ROI 内的标注（bbox 坐标仍是原帧坐标系）
+        // ROI 模式下，只输出 ROI 内的标注（bbox 坐标仍是原帧坐标系）
         if (roi_px.area() > 0) {
             auto &objs = label.objs;
             objs.erase(
@@ -66,7 +76,7 @@ public:
         
         // ===对当前这一帧进行检测和特征提取，更新跟踪器的状态
         // 3-1) 检测边界框
-        // 中文注释：若启用 ROI，则仅对 ROI 子图做检测以减少计算量；
+        // 若启用 ROI，则仅对 ROI 子图做检测以减少计算量；
         // 检测结果会在下方加上 (roi.x, roi.y) 偏移映射回原帧坐标系。
         cv::Mat detect_input = frame_;
         const int roi_offset_x = roi_px.area() > 0 ? roi_px.x : 0;
@@ -80,7 +90,7 @@ public:
         std::vector<TrackerInner> dets;
         dets.reserve(boxes.size());
         for (auto &b : boxes) {
-            // 中文注释：将 ROI 局部坐标映射回原帧坐标系（未启用 ROI 时 offset=0）
+            // 将 ROI 局部坐标映射回原帧坐标系（未启用 ROI 时 offset=0）
             b.box.x += static_cast<float>(roi_offset_x);
             b.box.y += static_cast<float>(roi_offset_y);
 
@@ -111,6 +121,7 @@ private:
     TrackingEngineConfig cfg_; // [TODO] 这里不需要把整个配置都传进去
     int frame_index_ = 0;
     cv::Mat frame_;
+    double dt_ = 1.0;
 };
 }  // namespace
 

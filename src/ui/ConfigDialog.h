@@ -10,7 +10,7 @@ class ConfigDialog;
 }
 QT_END_NAMESPACE
 
-// 中文注释：配置界面（只负责把 AppConfig 映射到表单，并在确认时输出新配置）
+// 配置界面（只负责把 AppConfig 映射到表单，并在确认时输出新配置）
 class ConfigDialog final : public QDialog {
     Q_OBJECT
 public:

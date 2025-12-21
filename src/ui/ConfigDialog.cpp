@@ -10,7 +10,7 @@ ConfigDialog::ConfigDialog(const AppConfig &initial, QWidget *parent)
     : QDialog(parent), ui_(new Ui::ConfigDialog) {
     ui_->setupUi(this);
 
-    // 中文注释：浏览按钮（选择 detector/feature 模型路径）
+    // 浏览按钮（选择 detector/feature 模型路径）
     connect(ui_->detectorModelBrowseButton, &QPushButton::clicked, this, [this]() {
         const QString path = QFileDialog::getOpenFileName(this, "选择检测模型", ui_->detectorModelPathEdit->text(), "ONNX (*.onnx)");
         if (!path.isEmpty()) ui_->detectorModelPathEdit->setText(path);
@@ -63,6 +63,13 @@ void ConfigDialog::loadToUi_(const AppConfig &cfg) {
     ui_->trackerMaxLifeSpin->setValue(cfg.engine.tracker_mgr.tracker_cfg.max_life);
     ui_->trackerMomentumSpin->setValue(cfg.engine.tracker_mgr.tracker_cfg.feature_momentum);
 
+    // ROI
+    ui_->roiEnableCheck->setChecked(cfg.engine.roi.enabled);
+    ui_->roiXSpin->setValue(cfg.engine.roi.x);
+    ui_->roiYSpin->setValue(cfg.engine.roi.y);
+    ui_->roiWSpin->setValue(cfg.engine.roi.w);
+    ui_->roiHSpin->setValue(cfg.engine.roi.h);
+
     // Recorder
     ui_->statsCsvPathEdit->setText(QString::fromStdString(cfg.recorder.stats_csv_path));
     ui_->statsExtraCheck->setChecked(cfg.recorder.enable_extra_statistics);
@@ -97,6 +104,13 @@ AppConfig ConfigDialog::readFromUi_() const {
     cfg.engine.tracker_mgr.tracker_cfg.max_life = ui_->trackerMaxLifeSpin->value();
     cfg.engine.tracker_mgr.tracker_cfg.feature_momentum = ui_->trackerMomentumSpin->value();
 
+    // ROI
+    cfg.engine.roi.enabled = ui_->roiEnableCheck->isChecked();
+    cfg.engine.roi.x = static_cast<float>(ui_->roiXSpin->value());
+    cfg.engine.roi.y = static_cast<float>(ui_->roiYSpin->value());
+    cfg.engine.roi.w = static_cast<float>(ui_->roiWSpin->value());
+    cfg.engine.roi.h = static_cast<float>(ui_->roiHSpin->value());
+
     // Recorder
     cfg.recorder.stats_csv_path = ui_->statsCsvPathEdit->text().toStdString();
     cfg.recorder.enable_extra_statistics = ui_->statsExtraCheck->isChecked();
@@ -112,7 +126,7 @@ QString ConfigDialog::joinIntList_(const std::vector<int> &ids) {
 }
 
 std::vector<int> ConfigDialog::parseIntList_(const QString &text) {
-    // 中文注释：支持 "0,1, 2" / "0 1 2" 等格式
+    // 支持 "0,1, 2" / "0 1 2" 等格式
     const QStringList tokens = text.split(QRegularExpression("[,\\s]+"), Qt::SkipEmptyParts);
 
     std::vector<int> ids;

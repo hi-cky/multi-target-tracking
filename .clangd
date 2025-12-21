@@ -1,4 +1,4 @@
-# 过程级别中文注释：为 clangd 添加 Qt 常用头文件与 Framework 搜索路径
+# 为 clangd 添加 Qt 常用头文件与 Framework 搜索路径
 CompileFlags:
   Add:
     - "-I$QT_PATH/include"
