@@ -33,6 +33,12 @@ public:
     void setProgress(int value, int maximum);
     // 更新开始按钮文字
     void setStartButtonText(const QString &text);
+    // 更新 Recorder 统计信息
+    void setRecorderInfo(const QString &status,
+                         const QString &frameText,
+                         const QString &objectsText,
+                         const QString &uniqueText,
+                         const QString &csvPath);
     // 输入控制区启用/禁用
     void setInputControlsEnabled(bool enabled);
     // 开始按钮启用/禁用

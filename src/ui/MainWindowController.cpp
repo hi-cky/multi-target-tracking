@@ -45,6 +45,7 @@ MainWindowController::MainWindowController(MainWindowView *view, QObject *parent
     updateSourceTitle_();
     updateStartAvailability_();
     view_->setStatusText(QStringLiteral("配置已加载：") + defaultConfigPath_());
+    updateRecorderUi_(QStringLiteral("未启用"));
 }
 
 QString MainWindowController::defaultConfigPath_() const {
@@ -156,9 +157,11 @@ bool MainWindowController::startRun_() {
             if (!config_.recorder.stats_csv_path.empty()) {
                 stats_ = std::make_unique<StatsRecorder>(config_.recorder);
             }
+            updateRecorderUi_(stats_ ? QStringLiteral("写入中") : QStringLiteral("未启用（路径为空）"));
         } else {
             // 不追踪时直接输出原帧，仅用可视化模块显示 ROI
             frame_iter_ = std::move(baseIter);
+            updateRecorderUi_(QStringLiteral("未启用（追踪关闭）"));
         }
 
         updateProgressUi_(-1);
@@ -173,7 +176,12 @@ void MainWindowController::stopRun_(const QString &statusText) {
     if (!view_) return;
 
     timer_.stop();
-    if (stats_) stats_->finalize();
+    if (stats_) {
+        updateRecorderUi_(QStringLiteral("已结束"));
+        stats_->finalize();
+    } else {
+        updateRecorderUi_(QStringLiteral("未启用"));
+    }
 
     resetIterators_();
     run_state_ = RunState::Idle;
@@ -214,6 +222,7 @@ void MainWindowController::onStartToggle_() {
         run_state_ = RunState::Paused;
         view_->setStartButtonText(QStringLiteral("继续"));
         view_->setStatusText(QStringLiteral("已暂停"));
+        if (stats_) updateRecorderUi_(QStringLiteral("已暂停"));
         return;
     }
 
@@ -222,6 +231,7 @@ void MainWindowController::onStartToggle_() {
         run_state_ = RunState::Running;
         view_->setStartButtonText(QStringLiteral("暂停"));
         view_->setStatusText(QStringLiteral("运行中…"));
+        if (stats_) updateRecorderUi_(QStringLiteral("写入中"));
         return;
     }
 }
@@ -247,6 +257,7 @@ void MainWindowController::onTick_() {
         }
 
         if (stats_) stats_->consume(lf);
+        if (stats_) updateRecorderUi_(QStringLiteral("写入中"));
 
         const cv::Mat &raw = iterator_->getFrame();
         cv::Mat vis = viz_.render(raw, lf);
@@ -298,6 +309,23 @@ void MainWindowController::updateProgressUi_(int frameIndex) {
     } else {
         view_->setFrameInfo(QStringLiteral("帧：%1").arg(displayIndex));
     }
+}
+
+void MainWindowController::updateRecorderUi_(const QString &status) {
+    if (!view_) return;
+
+    if (!stats_) {
+        view_->setRecorderInfo(status, "-", "-", "-", "");
+        return;
+    }
+
+    // 从 recorder 获取快照并刷新 UI 文本
+    const StatsRecorder::StatsSnapshot snap = stats_->snapshot();
+    const QString frameText = snap.frame_index >= 0 ? QString::number(snap.frame_index + 1) : "-";
+    const QString objectsText = QString::number(snap.objects_in_frame);
+    const QString uniqueText = QString::number(static_cast<int>(snap.unique_ids_seen));
+    const QString pathText = QString::fromStdString(snap.csv_path);
+    view_->setRecorderInfo(status, frameText, objectsText, uniqueText, pathText);
 }
 
 void MainWindowController::showMat_(const cv::Mat &mat) {

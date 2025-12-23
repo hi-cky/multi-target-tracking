@@ -130,6 +130,20 @@ void MainWindowView::setStartButtonText(const QString &text) {
     ui_->startButton->setText(text);
 }
 
+void MainWindowView::setRecorderInfo(const QString &status,
+                                     const QString &frameText,
+                                     const QString &objectsText,
+                                     const QString &uniqueText,
+                                     const QString &csvPath) {
+    if (!ui_) return;
+    ui_->recorderStatusValue->setText(status);
+    ui_->recorderFrameValue->setText(frameText);
+    ui_->recorderObjectsValue->setText(objectsText);
+    ui_->recorderUniqueValue->setText(uniqueText);
+    ui_->recorderPathValue->setText(csvPath.isEmpty() ? "-" : csvPath);
+    ui_->recorderPathValue->setToolTip(csvPath);
+}
+
 void MainWindowView::setInputControlsEnabled(bool enabled) {
     if (!ui_) return;
     ui_->sourceGroup->setEnabled(enabled);

@@ -43,6 +43,7 @@ private:
     void updateStartAvailability_();
     void updateProgressUi_(int frameIndex);
     void syncVisualizerConfig_();
+    void updateRecorderUi_(const QString &status);
     void showMat_(const cv::Mat &mat);
 
     MainWindowView *view_ = nullptr;

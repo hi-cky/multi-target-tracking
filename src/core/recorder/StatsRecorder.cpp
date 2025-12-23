@@ -41,6 +41,10 @@ void StatsRecorder::consume(const LabeledFrame &data)
             uniqueIdsSeen = seenIds.size();
         }
     }
+    // 更新本帧统计，供 UI 实时展示
+    lastFrameIndex = data.frame_index;
+    lastObjectsInFrame = static_cast<int>(data.objs.size());
+    totalRowsWritten += data.objs.size();
 
     // 写入表头（根据是否开启额外统计动态决定列名）
     if (!wroteHeader)
@@ -76,6 +80,18 @@ void StatsRecorder::consume(const LabeledFrame &data)
 
         out << "\n";
     }
+}
+
+StatsRecorder::StatsSnapshot StatsRecorder::snapshot() const
+{
+    StatsSnapshot snap;
+    snap.frame_index = lastFrameIndex;
+    snap.objects_in_frame = lastObjectsInFrame;
+    snap.unique_ids_seen = uniqueIdsSeen;
+    snap.total_rows_written = totalRowsWritten;
+    snap.extra_enabled = enableExtraStats;
+    snap.csv_path = cfg_.stats_csv_path;
+    return snap;
 }
 
 void StatsRecorder::finalize()
